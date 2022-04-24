@@ -13,6 +13,7 @@ const Slide = () => {
     id,
     src,
     width,
+    fullId,
   } = storage.slides[currentIndex];
 
   return (
@@ -23,6 +24,7 @@ const Slide = () => {
         width={width}
       />
       <image
+        id={fullId}
         height={height}
         href={buildFileURL(src)}
         x={0}

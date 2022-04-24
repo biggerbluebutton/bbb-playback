@@ -99,12 +99,15 @@ const SHAPES = {
   POLYGON: 'polygon',
   POLYLINE: 'polyline',
   TEXT: 'text',
+  MARKER: 'marker',
+  ERASER: 'eraser',
 };
 
 const THEME = {
   DARK: 'dark',
   LIGHT: 'light',
 };
+
 
 const getRouter = () => {
   if (typeof NO_ROUTER !== 'undefined') {
