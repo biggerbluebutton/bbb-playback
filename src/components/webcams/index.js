@@ -47,24 +47,9 @@ const buildSources = () => {
   ].filter(source => storage.media.find(m => source.type.includes(m)));
 };
 
-const buildTracks = () => {
-  return storage.captions.map(lang => {
-    const {
-      locale,
-      localeName,
-    } = lang;
-
-    return {
-      kind: 'captions',
-      src: buildFileURL(`caption_${locale}.vtt`),
-      srclang: locale,
-      label: localeName,
-    };
-  });
-};
-
-const buildOptions = (sources, tracks) => {
+const buildOptions = (sources) => {
   return {
+    autoplay: true,
     controlBar: {
       fullscreenToggle: false,
       pictureInPictureToggle: false,
@@ -78,7 +63,6 @@ const buildOptions = (sources, tracks) => {
     inactivityTimeout: 0,
     playbackRates: config.rates,
     sources: sources.current,
-    tracks: tracks.current,
   };
 };
 
@@ -90,16 +74,35 @@ const dispatchTimeUpdate = (time) => {
 const Webcams = () => {
   const intl = useIntl();
   const sources = useRef(buildSources());
-  const tracks = useRef(buildTracks());
+  const tracks = useRef(storage.captions);
   const element = useRef();
   const interval = useRef();
+  const textTracks = useRef();
+  const trackHandler = useRef();
 
   useEffect(() => {
     if (!player.webcams) {
       const video = element.current;
       if (!video) return;
 
-      player.webcams = videojs(video, buildOptions(sources, tracks), () => {
+      // Append track elements with placeholder sources
+      tracks.current.forEach(lang => {
+        const {
+          locale,
+          localeName,
+        } = lang;
+        const track = document.createElement('track');
+        track.kind = 'captions';
+        track.label = localeName;
+        track.srclang = locale;
+        track.src = 'data:text/vtt,WEBVTT';
+        track.setAttribute('data-src', buildFileURL(`caption_${locale}.vtt`));
+        video.appendChild(track);
+      });
+
+      player.webcams = videojs(video, buildOptions(sources), () => {
+        player.webcams.play();
+
         player.webcams.on('play', () => {
           const frequency = getFrequency();
           interval.current = setInterval(() => {
@@ -115,6 +118,7 @@ const Webcams = () => {
           dispatchTimeUpdate(currentTime);
         });
 
+        // Set initial time if provided
         const time = getTime();
         if (time) {
           player.webcams.on('loadedmetadata', () => {
@@ -124,6 +128,29 @@ const Webcams = () => {
             }
           });
         }
+
+        // Lazy load captions when selected
+        textTracks.current = player.webcams.textTracks();
+        trackHandler.current = () => {
+          for (let i = 0; i < textTracks.current.length; i += 1) {
+            const track = textTracks.current[i];
+            if (track.mode === 'showing') {
+              const trackEl = player.webcams.el().querySelector(`track[srclang="${track.language}"]`);
+              if (trackEl && !trackEl.dataset.loaded) {
+                player.webcams.addClass('vjs-waiting');
+                const onLoad = () => {
+                  trackEl.dataset.loaded = 'true';
+                  player.webcams.removeClass('vjs-waiting');
+                };
+                trackEl.addEventListener('load', onLoad, { once: true });
+                trackEl.addEventListener('error', onLoad, { once: true });
+                trackEl.setAttribute('src', trackEl.dataset.src);
+              }
+            }
+          }
+        };
+
+        textTracks.current.addEventListener('change', trackHandler.current);
       });
       logger.debug(ID.WEBCAMS, 'mounted');
     }
@@ -132,6 +159,9 @@ const Webcams = () => {
   useEffect(() => {
     return () => {
       if (player.webcams) {
+        if (textTracks.current && trackHandler.current) {
+          textTracks.current.removeEventListener('change', trackHandler.current);
+        }
         player.webcams.dispose();
         player.webcams = null;
         logger.debug(ID.WEBCAMS, 'unmounted');
