@@ -85,6 +85,9 @@ const Webcams = () => {
       const video = element.current;
       if (!video) return;
 
+      // Remove any existing tracks to avoid unwanted caption requests
+      video.querySelectorAll('track').forEach(t => t.remove());
+
       // Append track elements without eager sources
       tracks.current.forEach(lang => {
         const {
