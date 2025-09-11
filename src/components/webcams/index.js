@@ -152,7 +152,7 @@ const Webcams = () => {
           }
         };
 
-        textTracks.current.addEventListener('change', trackHandler.current);
+        player.webcams.on('texttrackchange', trackHandler.current);
       });
       logger.debug(ID.WEBCAMS, 'mounted');
     }
@@ -161,8 +161,8 @@ const Webcams = () => {
   useEffect(() => {
     return () => {
       if (player.webcams) {
-        if (textTracks.current && trackHandler.current) {
-          textTracks.current.removeEventListener('change', trackHandler.current);
+        if (trackHandler.current) {
+          player.webcams.off('texttrackchange', trackHandler.current);
         }
         player.webcams.dispose();
         player.webcams = null;
