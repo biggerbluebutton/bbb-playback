@@ -79,6 +79,7 @@ const Webcams = () => {
   const interval = useRef();
   const textTracks = useRef();
   const trackHandler = useRef();
+  const trackEls = useRef({});
 
   useEffect(() => {
     if (!player.webcams) {
@@ -104,6 +105,9 @@ const Webcams = () => {
 
         track.setAttribute('data-vtt-src', buildFileURL(`caption_${locale}.vtt`));
         video.appendChild(track);
+
+        // Keep a reference keyed by label for later lookup
+        trackEls.current[localeName.toLowerCase()] = track;
       });
 
       player.webcams = videojs(video, buildOptions(sources), () => {
@@ -141,9 +145,8 @@ const Webcams = () => {
           for (let i = 0; i < textTracks.current.length; i += 1) {
             const track = textTracks.current[i];
             if (track.mode === 'showing') {
-              // Match the corresponding <track> element using a case-insensitive language tag
-              const lang = track.language.toLowerCase();
-              const trackEl = player.webcams.el().querySelector(`track[srclang="${lang}"]`);
+              // Look up the associated <track> element by label (case-insensitive)
+              const trackEl = trackEls.current[track.label.toLowerCase()];
               if (trackEl && !trackEl.dataset.loaded) {
                 player.webcams.addClass('vjs-waiting');
                 const onLoad = () => {
