@@ -97,7 +97,11 @@ const Webcams = () => {
         const track = document.createElement('track');
         track.kind = 'captions';
         track.label = localeName;
-        track.srclang = locale;
+
+        // Use RFC 5646/BCP 47 hyphenated language tag for `srclang`
+        const srclang = locale.replace(/_/g, '-').toLowerCase();
+        track.srclang = srclang;
+
         track.setAttribute('data-vtt-src', buildFileURL(`caption_${locale}.vtt`));
         video.appendChild(track);
       });
@@ -137,7 +141,9 @@ const Webcams = () => {
           for (let i = 0; i < textTracks.current.length; i += 1) {
             const track = textTracks.current[i];
             if (track.mode === 'showing') {
-              const trackEl = player.webcams.el().querySelector(`track[srclang="${track.language}"]`);
+              // Match the corresponding <track> element using a case-insensitive language tag
+              const lang = track.language.toLowerCase();
+              const trackEl = player.webcams.el().querySelector(`track[srclang="${lang}"]`);
               if (trackEl && !trackEl.dataset.loaded) {
                 player.webcams.addClass('vjs-waiting');
                 const onLoad = () => {
