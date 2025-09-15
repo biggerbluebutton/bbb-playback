@@ -4,6 +4,7 @@ import Title from './title';
 import SearchButton from './buttons/search';
 import SectionButton from './buttons/section';
 import SwapButton from './buttons/swap';
+import SummaryButton from './buttons/summary';
 import { ID } from 'utils/constants';
 import './index.scss';
 
@@ -42,6 +43,7 @@ const Top = ({
       <div className="right">
         <SearchButton openSearch={() => openModal(ID.SEARCH)} />
         <SwapButton toggleSwap={toggleSwap} />
+        <SummaryButton />
       </div>
     </div>
   );

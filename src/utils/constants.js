@@ -42,6 +42,7 @@ const ID = {
   PRESENTATION: 'presentation',
   SCREENSHARE: 'screenshare',
   SEARCH: 'search',
+  SUMMARY: 'summary',
   SETTINGS: 'settings',
   SHAPES: 'shapes',
   SLIDES: 'slides',
