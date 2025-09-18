@@ -16,7 +16,7 @@ https://<domain>/playback/presentation/2.3/<recordId>
 ## URL query strings
 
 - frequency:
-  - `f=<value>`: renders per second (e.g., 5)
+  - `f=<value>`: renders per second (e.g., 5; use decimals such as `0.333` for ~3-second updates)
 
 - layout:
   - `l=content`: focus on content
@@ -59,6 +59,7 @@ https://<domain>/playback/presentation/2.3/<recordId>
   - `default`: fallback [`en`]
 
 - player: primary media configuration
+  - `timeUpdateIntervalSeconds`: seconds between timeline refreshes while playing (default `3`; overrides `rps` when provided)
   - `rps`: renders per second
   - `rates`: speed rates
 
