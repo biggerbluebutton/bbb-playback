@@ -1,6 +1,7 @@
 import { getCurrentDataIndex } from 'utils/data';
 import storage from 'utils/data/storage';
 import player from 'utils/player';
+import { dispatchTimeUpdate } from 'utils/events';
 
 const play = () => {
   if (player.primary.paused()) {
@@ -30,12 +31,19 @@ const seek = (seconds) => {
   const max = player.primary.duration();
   const time = player.primary.currentTime() + seconds;
 
+  let nextTime;
+
   if (time < min) {
-    player.primary.currentTime(min);
+    nextTime = min;
   } else if (time > max) {
-    player.primary.currentTime(max);
+    nextTime = max;
   } else {
-    player.primary.currentTime(time);
+    nextTime = time;
+  }
+
+  if (typeof nextTime === 'number') {
+    player.primary.currentTime(nextTime);
+    dispatchTimeUpdate(nextTime);
   }
 };
 
@@ -60,6 +68,7 @@ const skip = (change) => {
 
   if (typeof timestamp !== 'undefined') {
     player.primary.currentTime(timestamp);
+    dispatchTimeUpdate(timestamp);
   }
 };
 

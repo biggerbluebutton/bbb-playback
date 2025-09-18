@@ -4,6 +4,7 @@ import cx from 'classnames';
 import Info from './info';
 import Margin from './margin';
 import player from 'utils/player';
+import { dispatchTimeUpdate } from 'utils/events';
 import './index.scss';
 
 const propTypes = {
@@ -43,6 +44,7 @@ const Message = ({
 }) => {
   const handleOnClick = () => {
     player.primary.currentTime(timestamp);
+    dispatchTimeUpdate(timestamp);
   };
 
   return (

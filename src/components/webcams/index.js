@@ -2,12 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import videojs from 'video.js/core.es.js';
 import { player as config } from 'config';
-import { EVENTS, ID } from 'utils/constants';
+import { ID } from 'utils/constants';
 import { buildFileURL } from 'utils/data';
 import logger from 'utils/logger';
-import { getFrequency, getTime } from 'utils/params';
+import { getTime } from 'utils/params';
 import storage from 'utils/data/storage';
 import player from 'utils/player';
+import { dispatchTimeUpdate, getTimeUpdateIntervalMs } from 'utils/events';
 import './index.scss';
 
 const intlMessages = defineMessages({
@@ -44,11 +45,6 @@ const buildOptions = (sources) => ({
     nativeTextTracks: true,
   },
 });
-
-const dispatchTimeUpdate = (time) => {
-  const event = new CustomEvent(EVENTS.TIME_UPDATE, { detail: { time }});
-  document.dispatchEvent(event);
-};
 
 const Webcams = () => {
   const intl = useIntl();
@@ -124,14 +120,23 @@ const Webcams = () => {
       player.webcams.play();
 
       player.webcams.on('play', () => {
-        const frequency = getFrequency();
-        interval.current = setInterval(() => {
-          dispatchTimeUpdate(player.webcams.currentTime());
-        }, 1000 / (frequency || config.rps));
+        const intervalMs = getTimeUpdateIntervalMs();
+
+        clearInterval(interval.current);
+
+        if (Number.isFinite(intervalMs) && intervalMs > 0) {
+          interval.current = setInterval(() => {
+            dispatchTimeUpdate(player.webcams.currentTime());
+          }, intervalMs);
+        }
       });
 
       player.webcams.on('pause', () => {
         clearInterval(interval.current);
+      });
+
+      player.webcams.on('seeking', () => {
+        dispatchTimeUpdate(player.webcams.currentTime());
       });
 
       player.webcams.on('seeked', () => {

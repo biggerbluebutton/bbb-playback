@@ -35,6 +35,7 @@
     "webm"
   ],
   "player": {
+    "timeUpdateIntervalSeconds": 3,
     "rps": 10,
     "rates": [ 0.5, 1, 1.25, 1.5, 1.75, 2 ]
   },
