@@ -11,6 +11,7 @@ import { buildFileURL } from 'utils/data';
 import logger from 'utils/logger';
 import storage from 'utils/data/storage';
 import player from 'utils/player';
+import { parseCaptionsData, setupLazyCaptions } from 'utils/captions';
 import './index.scss';
 
 const intlMessages = defineMessages({
@@ -37,21 +38,39 @@ const buildOptions = (sources) => {
     controls: false,
     fill: true,
     sources: sources.current,
+    html5: {
+      nativeTextTracks: true,
+    },
   };
 };
 
 const Screenshare = () => {
   const intl = useIntl();
   const currentContent = useCurrentContent();
+  const {
+    locales: captionLocales,
+    defaultLocale: captionsDefaultLocale,
+  } = parseCaptionsData(storage.captions);
+
   const sources = useRef(buildSources());
+  const tracks = useRef(captionLocales);
+  const defaultCaptionLocale = useRef(captionsDefaultLocale);
   const element = useRef();
+  const captionsCleanup = useRef(() => {});
 
   useEffect(() => {
     if (!player.screenshare) {
       const video = element.current;
       if (!video) return;
 
-      player.screenshare = videojs(video, buildOptions(sources), () => {});
+      player.screenshare = videojs(video, buildOptions(sources), () => {
+        captionsCleanup.current = setupLazyCaptions({
+          playerInstance: player.screenshare,
+          videoElement: video,
+          tracks: tracks.current,
+          defaultLocale: defaultCaptionLocale.current,
+        });
+      });
       logger.debug(ID.SCREENSHARE, 'mounted');
     }
   }, []);
@@ -59,6 +78,10 @@ const Screenshare = () => {
   useEffect(() => {
     return () => {
       if (player.screenshare) {
+        if (captionsCleanup.current) {
+          captionsCleanup.current();
+          captionsCleanup.current = () => {};
+        }
         player.screenshare.dispose();
         player.screenshare = null;
         logger.debug(ID.SCREENSHARE, 'unmounted');
@@ -77,6 +100,7 @@ const Screenshare = () => {
           className="video-js"
           playsInline
           preload="auto"
+          crossOrigin="anonymous"
           ref={element}
         />
       </div>
