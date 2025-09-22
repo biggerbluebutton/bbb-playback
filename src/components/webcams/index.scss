@@ -14,6 +14,7 @@
   cursor: pointer;
   font-family: var(--font-family);
   font-weight: var(--font-weight-regular);
+  position: relative;
 }
 
 .video-js .vjs-big-play-button,
@@ -56,4 +57,9 @@
 [class^="vjs-text-track-cue"] {
   inset: auto 0 calc(#{$control-bar-height} * 2) 0 !important;
   z-index: 2;
+}
+
+.webcams-wrapper .video-js .vjs-text-track-display {
+  inset: 0;
+  position: absolute;
 }

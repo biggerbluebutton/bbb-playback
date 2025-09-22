@@ -38,7 +38,7 @@ const buildOptions = () => ({
   fill: true,
   inactivityTimeout: 0,
   playbackRates: config.rates,
-  html5: { nativeTextTracks: true }, // use native text tracks
+  html5: { nativeTextTracks: false }, // rely on Video.js overlay for captions positioning
 });
 
 const dispatchTimeUpdate = (time) => {
