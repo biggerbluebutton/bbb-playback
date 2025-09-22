@@ -27,7 +27,7 @@ const buildSources = () => {
   ].filter(source => storage.media.find(m => source.type.includes(m)));
 };
 
-const buildOptions = (sources) => ({
+const buildOptions = () => ({
   autoplay: true,
   controlBar: {
     fullscreenToggle: false,
@@ -38,11 +38,7 @@ const buildOptions = (sources) => ({
   fill: true,
   inactivityTimeout: 0,
   playbackRates: config.rates,
-  sources: sources.current,
-  // Important: use native text tracks so the browser fires the standard events
-  html5: {
-    nativeTextTracks: true,
-  },
+  html5: { nativeTextTracks: true }, // use native text tracks
 });
 
 const dispatchTimeUpdate = (time) => {
@@ -53,13 +49,13 @@ const dispatchTimeUpdate = (time) => {
 const Webcams = () => {
   const intl = useIntl();
 
-  const sources      = useRef(buildSources());
-  const tracks       = useRef(storage.captions || []); // [{ locale, localeName }]
-  const element      = useRef();
-  const interval     = useRef();
-  const textTracks   = useRef();
-  const trackHandler = useRef();
-  const trackElsByLabel = useRef({});
+  const sources        = useRef(buildSources());
+  const tracks         = useRef(storage.captions || []); // [{ localeName, locale, default }]
+  const element        = useRef(null);
+  const interval       = useRef(null);
+  const textTracks     = useRef(null);
+  const trackHandler   = useRef(null);
+  const trackElsByLang = useRef({}); // keyed by srclang
 
   useEffect(() => {
     if (player.webcams) return;
@@ -69,27 +65,35 @@ const Webcams = () => {
 
     // Clean any legacy track nodes
     video.querySelectorAll('track').forEach(t => t.remove());
-    trackElsByLabel.current = {};
+    trackElsByLang.current = {};
 
     // Create <track> nodes WITHOUT src; stash the real URL in data attribute
-    tracks.current.forEach(({ locale, localeName }) => {
+    tracks.current.forEach(({ locale, localeName, default: isDefault }) => {
+      const lang = (locale || '').replace(/_/g, '-').toLowerCase(); // e.g., "en", "en-us"
       const el = document.createElement('track');
       el.kind    = 'captions';
       el.label   = localeName;
-      el.srclang = (locale || '').replace(/_/g, '-').toLowerCase();
-      // Do NOT set el.src now; we will attach it on selection
+      el.srclang = lang;
+      if (isDefault) el.default = true; // mark default (semantic)
       el.setAttribute('data-vtt-src', buildFileURL(`caption_${locale}.vtt`));
-      trackElsByLabel.current[String(localeName || '').toLowerCase()] = el;
+      trackElsByLang.current[lang] = el;
       video.appendChild(el);
     });
 
     // Helper: robustly force a reload when we assign src the first time
-    const loadVttSrc = (trackEl) => {
+    const loadVttSrc = (trackEl, mode = 'showing') => {
       if (!trackEl) return;
-      if (trackEl.dataset.loaded === 'true') return;
 
       const realSrc = trackEl.dataset.vttSrc;
       if (!realSrc) return;
+
+      const setMode = () => {
+        const nativeTrack = trackEl.track; // HTMLTrackElement.track (TextTrack)
+        if (nativeTrack) nativeTrack.mode = mode; // 'showing' or 'hidden'
+      };
+
+      // If already loaded, just ensure mode
+      if (trackEl.dataset.loaded === 'true') { setMode(); return; }
 
       // UX hint while we fetch
       player.webcams?.addClass?.('vjs-waiting');
@@ -97,6 +101,7 @@ const Webcams = () => {
       const onFinish = () => {
         trackEl.dataset.loaded = 'true';
         player.webcams?.removeClass?.('vjs-waiting');
+        setMode();
         trackEl.removeEventListener('load', onFinish);
         trackEl.removeEventListener('error', onFinish);
       };
@@ -104,23 +109,14 @@ const Webcams = () => {
       trackEl.addEventListener('load', onFinish, { once: true });
       trackEl.addEventListener('error', onFinish, { once: true });
 
-      // Some browsers ignore a single src mutation; clear first then set next tick
+      // Force a reliable src-change load
       trackEl.setAttribute('src', '');
       (window.requestAnimationFrame || setTimeout)(() => {
         trackEl.setAttribute('src', realSrc);
-
-        // Ensure the native TextTrack becomes active after setting src
-        const nativeTrack = trackEl.track; // HTMLTrackElement.track (TextTrack)
-        if (nativeTrack) {
-          nativeTrack.mode = 'disabled';
-          (window.requestAnimationFrame || setTimeout)(() => {
-            nativeTrack.mode = 'showing';
-          }, 0);
-        }
       }, 0);
     };
 
-    player.webcams = videojs(video, buildOptions(sources), () => {
+    player.webcams = videojs(video, buildOptions(), () => {
       player.webcams.play();
 
       player.webcams.on('play', () => {
@@ -149,32 +145,27 @@ const Webcams = () => {
       // captions lazy-load
       textTracks.current = player.webcams.textTracks();
 
-      // Disable all initially (prevent auto show/load)
-      for (let i = 0; i < textTracks.current.length; i += 1) {
+      // Disable all initially to prevent any auto show
+      for (let i = 0; i < textTracks.current.length; i++) {
         const tt = textTracks.current[i];
-        if (tt && (tt.kind === 'captions' || tt.kind === 'subtitles')) {
-          tt.mode = 'disabled';
-        }
+        if (tt && (tt.kind === 'captions' || tt.kind === 'subtitles')) tt.mode = 'disabled';
       }
 
-      // On caption selection, attach real src if needed and force it to load
+      // When user selects a track, ensure its VTT is loaded & showing
       trackHandler.current = () => {
         const tts = textTracks.current;
         if (!tts) return;
 
-        for (let i = 0; i < tts.length; i += 1) {
+        for (let i = 0; i < tts.length; i++) {
           const tt = tts[i];
           if (!(tt && (tt.kind === 'captions' || tt.kind === 'subtitles'))) continue;
 
           if (tt.mode === 'showing') {
-            const labelLower = String(tt.label || '').toLowerCase();
+            const lang = (tt.language || '').toLowerCase();
             const trackEl =
-              trackElsByLabel.current[labelLower] ||
-              element.current.querySelector(
-                `track[srclang="${(tt.language || '').toLowerCase()}"]`
-              );
-
-            loadVttSrc(trackEl);
+              element.current.querySelector(`track[srclang="${lang}"]`) ||
+              trackElsByLang.current[lang];
+            loadVttSrc(trackEl, 'showing');
           }
         }
       };
@@ -183,18 +174,52 @@ const Webcams = () => {
       textTracks.current.addEventListener('change', trackHandler.current);
       player.webcams.on('texttrackchange', trackHandler.current);
 
-      // Optional: auto-select a default caption (match UI locale)
-      const preferred = (storage?.locale || navigator.language || '').split('-')[0];
-      if (preferred) {
+      // --- FORCE-SELECT & LOAD DEFAULT LOCALE ---
+      const activatePreferred = () => {
+        // 1) backend default (from getLocales), else UI/browser locale, else first track
+        const serverDefault = (tracks.current.find(t => t.default)?.locale || '')
+          .replace(/_/g, '-')
+          .toLowerCase();
+        const fallbackLocale = (storage?.locale || navigator.language || 'en')
+          .replace(/_/g, '-')
+          .toLowerCase();
+        const preferredLang = (serverDefault || fallbackLocale)
+          .split('-')[0];
+
+        // Find the <track> element
+        let el =
+          element.current.querySelector(`track[srclang="${preferredLang}"]`)
+          || element.current.querySelector(`track[srclang^="${preferredLang}-"]`); // en-us, fr-ca, etc.
+
+        // Fallback: first available track
+        if (!el) el = element.current.querySelector('track');
+
+        if (!el) return;
+
+        // Load VTT and show captions for the preferred/default track
+        loadVttSrc(el, 'showing');
+
+        // Also set the corresponding TextTrack mode to 'showing' (belt & suspenders)
         const tts = textTracks.current;
-        for (let i = 0; i < tts.length; i += 1) {
-          const tt = tts[i];
-          if ((tt.language || '').toLowerCase().startsWith(preferred.toLowerCase())) {
-            tt.mode = 'showing'; // triggers handler → loads real VTT
-            break;
+        if (tts) {
+          const want = el.getAttribute('srclang');
+          for (let i = 0; i < tts.length; i++) {
+            const tt = tts[i];
+            if (!(tt && (tt.kind === 'captions' || tt.kind === 'subtitles'))) continue;
+            const lang = (tt.language || '').toLowerCase();
+            if (lang === want || lang.startsWith(preferredLang)) {
+              tt.mode = 'showing';
+              break;
+            }
           }
         }
-      }
+      };
+
+      // Call once now, and again shortly in case tracks register a bit later
+      activatePreferred();
+      setTimeout(activatePreferred, 100);  // catch async TextTrack registration
+      setTimeout(activatePreferred, 400);  // final nudge on slower browsers
+      // --- end FORCE-SELECT ---
     });
 
     logger.debug(ID.WEBCAMS, 'mounted');
@@ -223,11 +248,16 @@ const Webcams = () => {
         <video
           className="video-js"
           playsInline
-          preload="auto"
-          // Set this when VTT or media may be on a different origin
+          preload="auto"       // was "none" – use "auto" for fastest start
+          autoPlay             // React prop (camelCase)
+          muted                // crucial for autoplay
           crossOrigin="anonymous"
           ref={element}
-        />
+        >
+          {sources.current.map(({ src, type }) => (
+            <source key={src} src={src} type={type} />
+          ))}
+        </video>
       </div>
     </div>
   );
