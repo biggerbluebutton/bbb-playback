@@ -63,22 +63,48 @@ const Webcams = () => {
     const video = element.current;
     if (!video) return;
 
-    // Clean any legacy track nodes
-    video.querySelectorAll('track').forEach(t => t.remove());
-    trackElsByLang.current = {};
+    const registerTrackElement = (trackEl) => {
+      if (!trackEl) return;
 
-    // Create <track> nodes WITHOUT src; stash the real URL in data attribute
-    tracks.current.forEach(({ locale, localeName, default: isDefault }) => {
-      const lang = (locale || '').replace(/_/g, '-').toLowerCase(); // e.g., "en", "en-us"
-      const el = document.createElement('track');
-      el.kind    = 'captions';
-      el.label   = localeName;
-      el.srclang = lang;
-      if (isDefault) el.default = true; // mark default (semantic)
-      el.setAttribute('data-vtt-src', buildFileURL(`caption_${locale}.vtt`));
-      trackElsByLang.current[lang] = el;
-      video.appendChild(el);
-    });
+      const srclang = (trackEl.getAttribute('srclang') || '').toLowerCase();
+      if (!srclang) return;
+
+      trackElsByLang.current[srclang] = trackEl;
+
+      const baseLang = srclang.split('-')[0];
+      if (baseLang && !trackElsByLang.current[baseLang]) {
+        trackElsByLang.current[baseLang] = trackEl;
+      }
+    };
+
+    const rebuildNativeTracks = () => {
+      const tech = player.webcams?.tech?.(true);
+      const techEl = tech?.el?.() || player.webcams?.el?.()?.querySelector?.('.vjs-tech');
+      if (!techEl) return null;
+
+      techEl.querySelectorAll('track').forEach(t => t.remove());
+      trackElsByLang.current = {};
+
+      tracks.current.forEach(({ locale, localeName, default: isDefault }) => {
+        const lang = (locale || '').replace(/_/g, '-').toLowerCase();
+        const trackEl = document.createElement('track');
+        trackEl.kind = 'captions';
+        trackEl.label = localeName;
+        trackEl.srclang = lang;
+        if (isDefault) trackEl.default = true;
+        trackEl.dataset.loaded = 'false';
+        trackEl.setAttribute('data-vtt-src', buildFileURL(`caption_${locale}.vtt`));
+        techEl.appendChild(trackEl);
+        registerTrackElement(trackEl);
+      });
+
+      return techEl;
+    };
+
+    const attachTracks = () => {
+      const techEl = rebuildNativeTracks();
+      if (techEl) element.current = techEl;
+    };
 
     // Helper: robustly force a reload when we assign src the first time
     const loadVttSrc = (trackEl, mode = 'showing') => {
@@ -117,6 +143,9 @@ const Webcams = () => {
     };
 
     player.webcams = videojs(video, buildOptions(), () => {
+      attachTracks();
+      player.webcams.on('loadstart', attachTracks);
+
       player.webcams.play();
 
       player.webcams.on('play', () => {
@@ -226,6 +255,7 @@ const Webcams = () => {
 
     return () => {
       if (player.webcams) {
+        player.webcams?.off?.('loadstart', attachTracks);
         if (textTracks.current && trackHandler.current) {
           textTracks.current.removeEventListener('change', trackHandler.current);
           player.webcams?.off?.('texttrackchange', trackHandler.current);
