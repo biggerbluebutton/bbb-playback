@@ -14,11 +14,11 @@
   cursor: pointer;
   font-family: var(--font-family);
   font-weight: var(--font-weight-regular);
-  position: relative;
 }
 
 .video-js .vjs-big-play-button,
-.video-js .vjs-loading-spinner,
+.vjs-text-track-display,
+.vjs-loading-spinner,
 .video-js .vjs-modal-dialog {
   position: fixed;
   z-index: 1;
@@ -53,12 +53,7 @@
   }
 }
 
-.webcams-wrapper [class^="vjs-text-track-cue"] {
+[class^="vjs-text-track-cue"] {
   inset: auto 0 calc(#{$control-bar-height} * 2) 0 !important;
   z-index: 2;
-}
-
-.webcams-wrapper .video-js .vjs-text-track-display {
-  inset: 0;
-  position: absolute;
 }
