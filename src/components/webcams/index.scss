@@ -14,11 +14,11 @@
   cursor: pointer;
   font-family: var(--font-family);
   font-weight: var(--font-weight-regular);
+  position: relative;
 }
 
 .video-js .vjs-big-play-button,
-.vjs-text-track-display,
-.vjs-loading-spinner,
+.video-js .vjs-loading-spinner,
 .video-js .vjs-modal-dialog {
   position: fixed;
   z-index: 2;
@@ -53,7 +53,39 @@
   }
 }
 
-[class^="vjs-text-track-cue"] {
-  inset: auto 0 calc(#{$control-bar-height} * 2) 0 !important;
-  z-index: 2;
+/* Hide default Video.js and native browser captions to avoid duplicates */
+.video-js .vjs-text-track-display { display: none !important; }
+video::-webkit-media-text-track-display { display: none !important; }
+
+/* External caption overlay — fixed at bottom center of viewport */
+.screen-subs {
+  position: fixed;
+  left: 50%;
+  bottom: 48px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 9999;
+  text-align: center;
+  max-width: min(1100px, 92vw);
+  transition: opacity 0.15s ease;
 }
+
+.screen-subs:empty {
+  opacity: 0;
+}
+
+.screen-subs > span {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 6px;
+  line-height: 1.45;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: clamp(16px, 2vw, 22px);
+  font-family: system-ui, -apple-system, “Segoe UI”, “Noto Naskh Arabic”, “Noto Sans”, sans-serif;
+  white-space: pre-wrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.01em;
+}
+
