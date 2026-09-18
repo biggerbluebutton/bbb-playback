@@ -14,12 +14,12 @@
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-intl": "^6.2.5",
-    "react-router-dom": "^6.4.3",
+    "react-router-dom": "^7.18.4",
     "react-sizeme": "^3.0.2",
     "recharts": "^2.12.7",
     "sass": "^1.52.1",
     "semver": "^7.5.2",
-    "styled-components": "^6.1.13",
+    "styled-components": "~6.3.12",
     "tldraw-v1": "npm:@tldraw/tldraw@^1.2.7",
     "video.js": "^7.21.1",
     "videojs-seek-buttons": "^3.0.1"
@@ -28,7 +28,14 @@
     "react-scripts": "^5.0.1"
   },
   "overrides": {
-    "nth-check": "2.0.1"
+    "nth-check": "2.0.1",
+    "@svgr/webpack": "6.5.1",
+    "resolve-url-loader": "5.0.0",
+    "postcss": "8.5.23",
+    "serialize-javascript": "7.0.5",
+    "uuid": "11.1.1",
+    "@tootallnate/once": "2.0.1",
+    "webpack-dev-server": "4.15.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -38,6 +45,12 @@
   },
   "eslintConfig": {
     "extends": "react-app"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(?:.*/)?nanoid/)",
+      "^.+\\.module\\.(css|sass|scss)$"
+    ]
   },
   "browserslist": {
     "production": [
@@ -63,5 +76,8 @@
   "license": "LGPL-3.0",
   "bugs": {
     "url": "https://github.com/bigbluebutton/bbb-playback/issues"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
