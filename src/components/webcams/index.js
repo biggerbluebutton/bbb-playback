@@ -15,6 +15,7 @@ import {
   getFrequency,
   getTime,
 } from 'utils/params';
+import progress from 'utils/progress';
 import storage from 'utils/data/storage';
 import player from 'utils/player';
 import './index.scss';
@@ -146,6 +147,7 @@ const Webcams = () => {
     const tracks         = useRef(storage.captions || []); // [{ localeName, locale, default }]
     const element        = useRef(null);
     const interval       = useRef(null);
+    const lastProgressSave = useRef(0);
     const textTracks     = useRef(null);
     const trackHandler   = useRef(null);
     const screenSubsRef  = useRef(null);
@@ -172,25 +174,52 @@ const Webcams = () => {
 
         // Create player
         player.webcams = videojs(video, buildOptions(), () => {
+            const recordId = storage.metadata.id;
+
             player.webcams.play();
 
             player.webcams.on('play', () => {
+                if (interval.current) clearInterval(interval.current);
                 const frequency = getFrequency();
                 interval.current = setInterval(() => {
-                    dispatchTimeUpdate(player.webcams.currentTime());
+                    if (player.webcams && !player.webcams.isDisposed()) {
+                        const currentTime = player.webcams.currentTime();
+                        dispatchTimeUpdate(currentTime);
+                        const now = Date.now();
+                        if (now - lastProgressSave.current >= progress.SAVE_INTERVAL) {
+                            progress.save(recordId, currentTime);
+                            lastProgressSave.current = now;
+                        }
+                    }
                 }, 1000 / (frequency || config.rps));
             });
 
-            player.webcams.on('pause', () => clearInterval(interval.current));
-            player.webcams.on('seeked', () => dispatchTimeUpdate(player.webcams.currentTime()));
+            player.webcams.on('pause', () => {
+                clearInterval(interval.current);
+                progress.save(recordId, player.webcams.currentTime());
+            });
 
-            const time = getTime();
-            if (time) {
-                player.webcams.on('loadedmetadata', () => {
-                    const duration = player.webcams.duration();
-                    if (time < duration) player.webcams.currentTime(time);
-                });
-            }
+            player.webcams.on('seeked', () => {
+                const currentTime = player.webcams.currentTime();
+                dispatchTimeUpdate(currentTime);
+                progress.save(recordId, currentTime);
+            });
+
+            player.webcams.on('ended', () => progress.clear(recordId));
+
+            // Restore position: URL time param takes priority, then localStorage
+            player.webcams.on('loadedmetadata', () => {
+                const duration = player.webcams.duration();
+                const urlTime = getTime();
+                if (urlTime !== null && urlTime < duration) {
+                    player.webcams.currentTime(urlTime);
+                } else {
+                    const savedTime = progress.load(recordId);
+                    if (savedTime && savedTime < duration) {
+                        player.webcams.currentTime(savedTime);
+                    }
+                }
+            });
 
             // Get TextTracks list
             textTracks.current = player.webcams.textTracks();
@@ -233,9 +262,9 @@ const Webcams = () => {
         logger.debug(ID.WEBCAMS, 'mounted');
 
         return () => {
+            if (interval.current) clearInterval(interval.current);
             if (player.webcams) {
                 if (player._cleanupSubs) { player._cleanupSubs(); player._cleanupSubs = null; }
-                clearInterval(interval.current);
                 player.webcams.dispose();
                 player.webcams = null;
             }

@@ -10,45 +10,47 @@ import { ID } from 'utils/constants';
 import './index.scss';
 
 const propTypes = {
-    openModal: PropTypes.func,
-    section: PropTypes.bool,
-    toggleSection: PropTypes.func,
-    toggleSwap: PropTypes.func,
+  openModal: PropTypes.func,
+  section: PropTypes.bool,
+  toggleSection: PropTypes.func,
+  toggleSwap: PropTypes.func,
+  hidePresentation: PropTypes.bool,
 };
 
 const defaultProps = {
-    openModal: () => {},
-    section: false,
-    toggleSection: () => {},
-    toggleSwap: () => {},
+  openModal: () => { },
+  section: false,
+  toggleSection: () => { },
+  toggleSwap: () => { },
 };
 
 const Top = ({
-                 openModal,
-                 section,
-                 toggleSection,
-                 toggleSwap,
-             }) => {
+  openModal,
+  section,
+  toggleSection,
+  toggleSwap,
+  hidePresentation,
+}) => {
 
-    return (
-        <div className="top-bar">
-            <div className="left">
-                <SectionButton
-                    section={section}
-                    toggleSection={toggleSection}
-                />
-            </div>
-            <div className="center">
-                <Title openAbout={() => openModal(ID.ABOUT)} />
-            </div>
-            <div className="right">
-                <SummaryButton />
-                <ThemeButton />
-                <SearchButton openSearch={() => openModal(ID.SEARCH)} />
-                <SwapButton toggleSwap={toggleSwap} />
-            </div>
-        </div>
-    );
+  return (
+    <div className="top-bar">
+      <div className="left">
+        <SectionButton
+          section={section}
+          toggleSection={toggleSection}
+        />
+      </div>
+      <div className="center">
+        <Title openAbout={() => openModal(ID.ABOUT)} />
+      </div>
+      <div className="right">
+        <SummaryButton />
+        <ThemeButton />
+        <SearchButton openSearch={() => openModal(ID.SEARCH)} />
+        <SwapButton toggleSwap={toggleSwap} hidePresentation={hidePresentation} />
+      </div>
+    </div>
+  );
 };
 
 Top.propTypes = propTypes;
@@ -56,7 +58,8 @@ Top.defaultProps = defaultProps;
 
 // Checks the side section state
 const areEqual = (prevProps, nextProps) => {
-    return prevProps.section === nextProps.section;
+  if (prevProps.hidePresentation !== nextProps.hidePresentation) return false;
+  return prevProps.section === nextProps.section;
 };
 
 export default React.memo(Top, areEqual);

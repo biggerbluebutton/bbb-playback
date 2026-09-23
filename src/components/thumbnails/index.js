@@ -18,6 +18,7 @@ import {
   isEmpty,
   isEqual,
 } from 'utils/data/validators';
+import { buildThumbnailItems } from './utils';
 import './index.scss';
 
 const intlMessages = defineMessages({
@@ -77,52 +78,7 @@ const Thumbnails = ({
   });
 
   const items = useMemo(() => {
-    const thumbnails = storage.thumbnails;
-    const layoutSwap = storage.layoutSwap ?? [];
-    const merged = [...thumbnails, ...layoutSwap];
-    const sorted = merged.sort((a, b) => a.timestamp - b.timestamp);
-
-    const addThumbsForSwap = sorted.map((item, index, arr) => {
-      const previousItem = arr[index - 1];
-      const nextItem = arr[index + 1];
-      if (item.hasOwnProperty('showScreenshare')) {
-        if (!item.showScreenshare) {
-          const previousThumbs = arr.slice(0, index)
-          const Thumbnail = previousThumbs.find((t) => t.src && t.src !== 'screenshare');
-          // don't add if the src is the same as before
-          if (Thumbnail?.src === previousItem?.src) {
-            return null;
-          } else {
-            return {
-              ...item,
-              src: Thumbnail?.src ?? '',
-              alt: Thumbnail?.alt ?? '',
-            };
-          }
-        } else if (
-          item.showScreenshare
-          && (nextItem && nextItem.src !== 'screenshare')
-          && (previousItem && previousItem.src !== 'screenshare')
-        ) {
-          return {
-            ...item,
-            src: 'screenshare',
-            alt: 'screenshare',
-          }
-        }
-        return null;
-      }
-      return item;
-    }).filter((item) => item !== null);
-
-    const reworkIds = addThumbsForSwap.map((item, index) => {
-      return {
-        ...item,
-        id: index + 1,
-      }
-    });
-
-    return reworkIds;
+    return buildThumbnailItems(storage.thumbnails, storage.layoutSwap, storage.screenshare);
   }, []);
 
   const currentIndex = useCurrentIndex(items);
