@@ -39,5 +39,6 @@
   "player.search.modal.title": "Search",
   "player.search.modal.subtitle": "Find presentation slides content",
   "player.thumbnails.wrapper.aria": "Thumbnails area",
-  "player.webcams.wrapper.aria": "Webcams area"
+  "player.webcams.wrapper.aria": "Webcams area",
+  "player.webcams.captions.translating": "Translating captions…"
 }

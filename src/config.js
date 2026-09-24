@@ -77,6 +77,25 @@ const thumbnails = {
   scroll: true,
 };
 
+// On-demand caption translation.
+//
+// When enabled, the closed-caption (CC) menu is populated with every language
+// the player ships translations for. Selecting a language that does not already
+// have a caption file translates the existing captions into it on the fly, using
+// a LibreTranslate-compatible HTTP endpoint (POST { q, source, target, format }).
+//
+// `url` should point at a translation service you control; the default targets
+// the public LibreTranslate instance, which requires an `apiKey`. `source` is the
+// language the original captions are written in ('auto' lets the service detect
+// it). `batchSize` caps how many cues are sent per request.
+const translation = {
+  enabled: true,
+  url: 'https://libretranslate.com/translate',
+  apiKey: '',
+  source: 'auto',
+  batchSize: 25,
+};
+
 export {
   chat,
   controls,
@@ -89,4 +108,5 @@ export {
   shortcuts,
   styles,
   thumbnails,
+  translation,
 };
