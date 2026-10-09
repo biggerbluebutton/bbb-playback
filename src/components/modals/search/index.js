@@ -72,11 +72,16 @@ const Search = ({
     handleClose();
   };
 
+  const handleOnSubmit = () => {
+    if (!disabled) handleOnClick();
+  };
+
   return (
     <Modal onClose={handleClose}>
       <Header />
       <Body
         handleOnChange={(event) => handleOnChange(event)}
+        handleOnSubmit={() => handleOnSubmit()}
         search={search}
       />
       <Footer

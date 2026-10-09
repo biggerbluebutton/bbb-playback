@@ -26,6 +26,8 @@ const buildSwapThumbnail = (item, index, arr, screenshare) => {
         ...item,
         src: restoredSlide.src,
         alt: restoredSlide.alt ?? '',
+        width: restoredSlide.width,
+        height: restoredSlide.height,
       };
     }
     return null;

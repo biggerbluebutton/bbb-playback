@@ -100,6 +100,7 @@ const Thumbnails = ({
             <Item
               active={active}
               index={index}
+              key={item.id ?? index}
               interactive={interactive}
               item={item}
               setRef={setRef}

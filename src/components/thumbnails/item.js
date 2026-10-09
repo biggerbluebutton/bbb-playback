@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import Thumbnail from './thumbnail';
-import { handleOnEnterPress } from 'utils/data/handlers';
+import { handleOnKeyActivation } from 'utils/data/handlers';
 import player from 'utils/player';
 import './index.scss';
 
@@ -38,8 +38,10 @@ const Item = ({
       >
         <Thumbnail
           alt={item.alt}
+          height={item.height}
           index={index}
           src={item.src}
+          width={item.width}
         />
       </div>
     );
@@ -51,16 +53,20 @@ const Item = ({
 
   return (
     <div
+      aria-current={active ? 'true' : undefined}
       className={cx('thumbnail-wrapper', { active, interactive })}
       onClick={() => handleOnClick()}
-      onKeyPress={event => handleOnEnterPress(event, handleOnClick)}
+      onKeyDown={event => handleOnKeyActivation(event, handleOnClick)}
       ref={node => setRef(node, index)}
+      role="button"
       tabIndex="0"
     >
       <Thumbnail
         alt={item.alt}
+        height={item.height}
         index={index}
         src={item.src}
+        width={item.width}
       />
     </div>
   );
