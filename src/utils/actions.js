@@ -3,6 +3,8 @@ import storage from 'utils/data/storage';
 import player from 'utils/player';
 
 const play = () => {
+  if (!player.primary) return;
+
   if (player.primary.paused()) {
     const playPromise = player.primary.play();
     if (playPromise !== undefined) {
@@ -33,6 +35,8 @@ const search = (text, thumbnails) => {
 };
 
 const seek = (seconds) => {
+  if (!player.primary) return;
+
   const min = 0;
   const max = player.primary.duration();
   const time = player.primary.currentTime() + seconds;
@@ -47,6 +51,8 @@ const seek = (seconds) => {
 };
 
 const skip = (change) => {
+  if (!player.primary) return null;
+
   const min = 0;
   const max = storage.slides.length - 1;
   const time = player.primary.currentTime();

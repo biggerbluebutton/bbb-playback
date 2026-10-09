@@ -20,6 +20,7 @@ import {
 import storage from 'utils/data/storage';
 import layout from 'utils/layout';
 import logger from 'utils/logger';
+import { loadVideojsLanguage } from 'utils/videojsLanguage';
 import {
   getLayout,
   parseRecordId,
@@ -70,8 +71,9 @@ const Loader = () => {
     };
 
     importPlayer().catch(error => logger.error('loader', 'player', error));
+    loadVideojsLanguage(intl.locale);
     storage.fetch(recordId.current, onUpdate, onLoaded, onError);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!loaded) return;

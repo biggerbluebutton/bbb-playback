@@ -17,6 +17,7 @@ import {
   getTime,
 } from 'utils/params';
 import { formatTime } from 'utils/format';
+import { loadVideojsLanguage } from 'utils/videojsLanguage';
 import {
   getMediaPreferences,
   saveMediaPreferences,
@@ -119,11 +120,22 @@ const Webcams = () => {
   const lastProgressSave = useRef(0);
 
   useEffect(() => {
-    if (!player.webcams) {
+    let cancelled = false;
+
+    // Controls are labelled when created, so the translation comes first
+    loadVideojsLanguage(intl.locale).then((language) => {
+      if (cancelled || player.webcams) return;
+
       const video = element.current;
       if (!video) return;
 
-      player.webcams = videojs(video, buildOptions(sources, tracks), () => {
+      const options = buildOptions(sources, tracks);
+      if (language) {
+        videojs.addLanguage(language.code, language.translations);
+        options.language = language.code;
+      }
+
+      player.webcams = videojs(video, options, () => {
         const recordId = storage.metadata.id;
 
         const preferences = getMediaPreferences(config.rates);
@@ -200,7 +212,11 @@ const Webcams = () => {
         player.webcams.on('loadedmetadata', () => renderSlideMarkers(player.webcams));
       });
       logger.debug(ID.WEBCAMS, 'mounted');
-    }
+    });
+
+    return () => {
+      cancelled = true;
+    };
     // The video.js player is created once; the locale cannot change meanwhile
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

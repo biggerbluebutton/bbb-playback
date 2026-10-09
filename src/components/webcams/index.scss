@@ -84,9 +84,28 @@ $big-play-button-size: 2em;
   }
 }
 
+// Captions sit above the thumbnails. vtt.js derives the text size from this
+// box, so its height keeps the captions readable instead of huge
+.video-js .vjs-text-track-display {
+  bottom: calc(#{$control-bar-height} + #{$bottom-bar-height} + #{$bottom-content-height} + #{$margin});
+  height: 50vh;
+  left: 0;
+  pointer-events: none;
+  position: fixed;
+  right: 0;
+  top: auto;
+  width: auto;
+}
+
 [class^="vjs-text-track-cue"] {
-  inset: auto 0 calc(#{$control-bar-height} * 2) 0 !important;
+  inset: auto 0 0 0 !important;
   z-index: 2;
+
+  > div {
+    border-radius: $border-radius;
+    line-height: 1.45;
+    padding: .1em .45em;
+  }
 }
 
 // Slide changes on the timeline
