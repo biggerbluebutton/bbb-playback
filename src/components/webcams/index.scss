@@ -2,7 +2,13 @@
 
 :root {
   --control-bar-background-color: var(--gray-dark);
+  --big-play-button-background-color: var(--blue);
+  --big-play-button-color: var(--white);
+  --progress-color: var(--blue);
 }
+
+// Relative to the video.js big play button font size
+$big-play-button-size: 2em;
 
 .webcams-wrapper {
   display: flex;
@@ -25,12 +31,37 @@
 }
 
 .video-js .vjs-big-play-button {
+  background-color: var(--big-play-button-background-color);
   border: none;
-  border-radius: 0;
-  line-height: 1.65em;
+  border-radius: 50%;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  color: var(--big-play-button-color);
+  height: $big-play-button-size;
   left: 50%;
+  line-height: $big-play-button-size;
+  margin: 0;
   top: 50%;
   transform: translate(-50%, -50%);
+  transition: transform var(--transition-duration) ease, filter var(--transition-duration) ease;
+  width: $big-play-button-size;
+}
+
+.video-js:hover .vjs-big-play-button,
+.video-js .vjs-big-play-button:focus {
+  background-color: var(--big-play-button-background-color);
+  filter: brightness(1.1);
+  transform: translate(-50%, -50%) scale(1.06);
+  transition: transform var(--transition-duration) ease, filter var(--transition-duration) ease;
+}
+
+.video-js .vjs-play-progress,
+.video-js .vjs-volume-level {
+  background-color: var(--progress-color);
+}
+
+.video-js .vjs-control:focus-visible {
+  outline: $focus-ring-width solid var(--white);
+  outline-offset: -$focus-ring-width;
 }
 
 .vjs-text-track-display,

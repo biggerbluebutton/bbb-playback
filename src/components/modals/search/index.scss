@@ -17,11 +17,24 @@ $result-height: $bottom-content-height;
   overflow-x: hidden;
   padding: 0 $padding;
 
-  input[type="text"] {
+  input[type="search"] {
+    background-color: var(--primary-background-color);
+    border: 1px solid var(--gray-lightest);
+    border-radius: $border-radius;
     box-sizing: border-box;
+    color: inherit;
+    font-family: inherit;
     font-size: large;
     overflow: hidden;
+    padding: $padding-small $padding;
+    transition: border-color var(--transition-duration) ease, box-shadow var(--transition-duration) ease;
     width: 100%;
+
+    &:focus {
+      border-color: var(--focus-ring-color);
+      box-shadow: 0 0 0 $focus-ring-width rgba(15, 112, 215, .25);
+      outline: none;
+    }
   }
 
   .result {

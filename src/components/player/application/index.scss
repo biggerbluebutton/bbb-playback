@@ -18,33 +18,63 @@
 
   .application-control {
     background-color: var(--application-control-background-color);
+    border-bottom: 1px solid var(--border-color);
     box-sizing: border-box;
     display: flex;
     flex-direction: row-reverse;
-    padding: $padding;
+    gap: $margin-extra-small;
+    padding: $padding-extra-small $padding-small;
 
     .application-icon {
+      align-items: center;
+      background: none;
+      border: none;
+      border-radius: $border-radius;
       box-sizing: border-box;
       color: var(--application-control-color);
       display: flex;
+      font-family: inherit;
       font-size: large;
       font-weight: var(--font-weight-semi-bold);
-      opacity: .75;
+      justify-content: center;
+      opacity: 1;
       outline: none;
       overflow: hidden;
+      padding: $padding-small;
+      position: relative;
+      transition:
+        background-color var(--transition-duration) ease,
+        opacity var(--transition-duration) ease;
 
-      [dir="ltr"] & {
-        padding-left: $padding;
+      // Active tab indicator
+      &::after {
+        background-color: var(--focus-ring-color);
+        border-radius: $border-width-small;
+        bottom: 0;
+        content: '';
+        height: $border-width-small;
+        left: $padding-small;
+        position: absolute;
+        right: $padding-small;
       }
 
-      [dir="rtl"] & {
-        padding-right: $padding;
+      &:focus-visible {
+        box-shadow: inset 0 0 0 $focus-ring-width var(--focus-ring-color);
       }
     }
 
     .inactive {
       cursor: pointer;
-      opacity: .5;
+      opacity: .55;
+
+      &::after {
+        display: none;
+      }
+
+      &:hover {
+        background-color: var(--tertiary-highlight-color);
+        opacity: .85;
+      }
     }
   }
 }

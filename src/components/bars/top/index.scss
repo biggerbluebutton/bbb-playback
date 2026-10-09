@@ -8,6 +8,7 @@
 
 .top-bar {
   background-color: var(--top-bar-background-color);
+  border-bottom: 1px solid var(--border-color);
   color: var(--top-bar-color);
   box-sizing: border-box;
   display: flex;
@@ -45,8 +46,10 @@
   }
 
   .title {
+    border-radius: $border-radius;
+    font-weight: var(--font-weight-semi-bold);
     overflow: hidden;
-    padding: $padding-small;
+    padding: $padding-small $padding;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -54,10 +57,15 @@
   .interactive {
     cursor: pointer;
     outline: none;
+    transition: background-color var(--transition-duration) ease;
 
-    &:focus,
     &:hover {
       background-color: var(--top-bar-active-background-color);
+    }
+
+    &:focus-visible {
+      background-color: var(--top-bar-active-background-color);
+      box-shadow: inset 0 0 0 $focus-ring-width var(--focus-ring-color);
     }
   }
 }

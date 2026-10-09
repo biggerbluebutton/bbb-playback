@@ -14,9 +14,13 @@ $thumbnail-height: calc((#{$bottom-content-height} / 10) * 6);
 }
 
 .thumbnail-wrapper {
+  border-radius: $border-radius;
   box-sizing: border-box;
   display: flex;
+  flex-shrink: 0;
+  margin: $margin-extra-small;
   padding: $padding-extra-small;
+  transition: background-color var(--transition-duration) ease;
 
   .thumbnail {
     align-self: flex-start;
@@ -25,21 +29,35 @@ $thumbnail-height: calc((#{$bottom-content-height} / 10) * 6);
     justify-content: center;
 
     .thumbnail-image {
+      background-color: var(--white);
+      border-radius: calc(#{$border-radius} / 2);
+      box-shadow: 0 0 0 1px var(--border-color);
       display: block;
       height: $thumbnail-height;
+      transition: box-shadow var(--transition-duration) ease;
       width: auto;
     }
 
     .thumbnail-index {
       display: flex;
       font-size: x-small;
+      font-variant-numeric: tabular-nums;
       font-weight: var(--font-weight-bold);
       margin-top: $margin-extra-small;
     }
 
     .screenshare {
+      align-items: center;
+      background-color: transparent;
+      box-shadow: none;
+      display: flex;
       font-size: xxx-large;
       font-weight: var(--font-weight-semi-bold);
+      justify-content: center;
     }
+  }
+
+  &.active .thumbnail .thumbnail-image:not(.screenshare) {
+    box-shadow: 0 0 0 $border-width-small var(--focus-ring-color);
   }
 }
