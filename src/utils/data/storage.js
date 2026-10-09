@@ -43,11 +43,12 @@ const hasFetched = () => {
   return false;
 }
 
+// Every file and the media probe must be settled. Counting the stored keys
+// is not enough since media and lazily derived data share the same object
 const hasLoaded = () => {
-  const stored = Object.keys(DATA).length;
-  const data = Object.keys(files).length;
+  const settled = Object.keys(files).every(data => Object.hasOwn(DATA, data));
 
-  if (stored >= data) {
+  if (settled && Object.hasOwn(DATA, ID.MEDIA)) {
     logger.debug(ID.STORAGE, STATE.LOADED);
     STATUS = STATE.LOADED;
 
@@ -94,12 +95,16 @@ const fetchFile = (data, recordId, onUpdate, onLoaded, onError) => {
 const fetchMedia = (recordId, onUpdate, onLoaded, onError) => {
   const fetches = medias.map(type => {
     const url = buildFileURL(`video/webcams.${type}`, recordId);
-    return fetch(url, { method: 'HEAD' });
+    // A failing format must not prevent the other formats from being used
+    return fetch(url, { method: 'HEAD' }).catch(error => {
+      logger.warn(ID.STORAGE, ID.MEDIA, type, error);
+      return null;
+    });
   });
 
   Promise.all(fetches).then(responses => {
     const media = [];
-    responses.forEach(response => {
+    responses.filter(Boolean).forEach(response => {
       const { ok, url } = response;
       if (ok) {
         logger.debug(ID.STORAGE, ID.MEDIA, response);
@@ -134,6 +139,9 @@ const tryMediaFallback = (recordId, onUpdate, onLoaded, onError) => {
     } else {
       onError(ERROR.NOT_FOUND);
     }
+  }).catch(error => {
+    logger.warn(ID.STORAGE, ID.MEDIA, error);
+    onError(ERROR.NOT_FOUND);
   });
 };
 
