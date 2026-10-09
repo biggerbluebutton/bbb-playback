@@ -3,13 +3,13 @@
 :root {
   --toast-background-color: rgb(30, 41, 59);
   --toast-color: rgb(248, 250, 252);
-  --toast-action-color: rgb(125, 186, 255);
+  --toast-action-color: rgb(255, 140, 215);
 }
 
 :root[data-theme="dark"] {
   --toast-background-color: rgb(241, 245, 249);
   --toast-color: rgb(15, 23, 42);
-  --toast-action-color: var(--blue);
+  --toast-action-color: var(--accent-color);
 }
 
 .toast-region {

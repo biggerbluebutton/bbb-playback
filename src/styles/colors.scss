@@ -37,21 +37,22 @@
 
   --muted-content-color: rgb(100, 116, 139);
   --border-color: rgba(15, 23, 42, .08);
-  --focus-ring-color: var(--blue);
+  --focus-ring-color: var(--accent-color);
   --shadow-color: rgba(15, 23, 42, .16);
-  --stage-shadow: 0 2px 6px rgba(15, 23, 42, .06), 0 24px 60px -12px rgba(79, 70, 229, .35);
+  --stage-shadow: 0 2px 6px rgba(15, 23, 42, .06), 0 24px 60px -12px rgba(231, 49, 178, .32);
 
-  // Brand: blue to violet to pink
-  --accent-color: rgb(91, 61, 245);
-  --accent-gradient: linear-gradient(120deg, rgb(37, 99, 235) 0%, rgb(124, 58, 237) 52%, rgb(219, 39, 119) 100%);
-  --accent-glow: rgba(124, 58, 237, .35);
+  // Brand: magenta #E731B2, with a deeper violet and a warm pink around it
+  --accent-color: rgb(231, 49, 178);
+  --accent-gradient: linear-gradient(120deg, rgb(160, 38, 206) 0%, rgb(231, 49, 178) 52%, rgb(255, 92, 138) 100%);
+  --accent-glow: rgba(231, 49, 178, .35);
+  --accent-soft: rgba(231, 49, 178, .1);
 
   // Soft color glows behind the slide
   --stage-background:
-    radial-gradient(60% 70% at 8% 0%, rgba(99, 102, 241, .20), transparent 60%),
-    radial-gradient(50% 60% at 100% 10%, rgba(236, 72, 153, .14), transparent 60%),
-    radial-gradient(70% 60% at 50% 110%, rgba(6, 182, 212, .16), transparent 60%),
-    rgb(244, 246, 251);
+    radial-gradient(60% 70% at 8% 0%, rgba(231, 49, 178, .16), transparent 60%),
+    radial-gradient(50% 60% at 100% 10%, rgba(160, 38, 206, .13), transparent 60%),
+    radial-gradient(70% 60% at 50% 110%, rgba(255, 120, 150, .14), transparent 60%),
+    rgb(249, 245, 250);
 
   color-scheme: light;
 }
@@ -79,16 +80,18 @@
   --muted-content-color: rgb(139, 151, 167);
   --border-color: rgba(255, 255, 255, .08);
   --shadow-color: rgba(0, 0, 0, .5);
-  --stage-shadow: 0 2px 6px rgba(0, 0, 0, .4), 0 24px 60px -12px rgba(124, 58, 237, .45);
+  --stage-shadow: 0 2px 6px rgba(0, 0, 0, .4), 0 24px 60px -12px rgba(231, 49, 178, .4);
 
-  --accent-color: rgb(139, 116, 255);
-  --accent-glow: rgba(139, 92, 246, .45);
+  // Brighter on dark backgrounds
+  --accent-color: rgb(242, 84, 196);
+  --accent-glow: rgba(242, 84, 196, .42);
+  --accent-soft: rgba(242, 84, 196, .14);
 
   --stage-background:
-    radial-gradient(60% 70% at 8% 0%, rgba(99, 102, 241, .28), transparent 60%),
-    radial-gradient(50% 60% at 100% 10%, rgba(236, 72, 153, .18), transparent 60%),
-    radial-gradient(70% 60% at 50% 110%, rgba(6, 182, 212, .16), transparent 60%),
-    rgb(11, 14, 20);
+    radial-gradient(60% 70% at 8% 0%, rgba(231, 49, 178, .24), transparent 60%),
+    radial-gradient(50% 60% at 100% 10%, rgba(160, 38, 206, .2), transparent 60%),
+    radial-gradient(70% 60% at 50% 110%, rgba(255, 92, 138, .12), transparent 60%),
+    rgb(14, 11, 18);
 
   color-scheme: dark;
 }

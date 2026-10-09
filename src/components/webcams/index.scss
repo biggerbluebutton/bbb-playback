@@ -68,15 +68,15 @@ $big-play-button-size: 2em;
 // Inviting pulse around the play button before playback starts
 @keyframes play-pulse {
   0% {
-    box-shadow: 0 10px 30px -6px var(--accent-glow), 0 0 0 0 rgba(124, 58, 237, .45);
+    box-shadow: 0 10px 30px -6px var(--accent-glow), 0 0 0 0 rgba(231, 49, 178, .45);
   }
 
   70% {
-    box-shadow: 0 10px 30px -6px var(--accent-glow), 0 0 0 .6em rgba(124, 58, 237, 0);
+    box-shadow: 0 10px 30px -6px var(--accent-glow), 0 0 0 .6em rgba(231, 49, 178, 0);
   }
 
   100% {
-    box-shadow: 0 10px 30px -6px var(--accent-glow), 0 0 0 0 rgba(124, 58, 237, 0);
+    box-shadow: 0 10px 30px -6px var(--accent-glow), 0 0 0 0 rgba(231, 49, 178, 0);
   }
 }
 
@@ -211,7 +211,7 @@ $big-play-button-size: 2em;
   li.vjs-selected,
   li.vjs-selected:hover,
   li.vjs-selected:focus {
-    background-color: var(--blue);
+    background: var(--accent-gradient);
     color: var(--white);
   }
 }
