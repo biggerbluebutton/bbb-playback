@@ -38,12 +38,23 @@ $thumbnail-height: calc((#{$bottom-content-height} / 10) * 6);
       width: auto;
     }
 
-    .thumbnail-index {
+    .thumbnail-footer {
+      align-items: baseline;
       display: flex;
       font-size: x-small;
       font-variant-numeric: tabular-nums;
-      font-weight: var(--font-weight-bold);
+      gap: $margin-small;
+      justify-content: space-between;
       margin-top: $margin-extra-small;
+      padding: 0 $padding-extra-small * .5;
+    }
+
+    .thumbnail-index {
+      font-weight: var(--font-weight-bold);
+    }
+
+    .thumbnail-time {
+      color: var(--muted-content-color);
     }
 
     .screenshare {

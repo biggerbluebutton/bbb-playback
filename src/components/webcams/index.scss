@@ -88,3 +88,21 @@ $big-play-button-size: 2em;
   inset: auto 0 calc(#{$control-bar-height} * 2) 0 !important;
   z-index: 2;
 }
+
+// Slide changes on the timeline
+.vjs-slide-markers {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.vjs-slide-marker {
+  background-color: rgba(255, 255, 255, .55);
+  border-radius: 1px;
+  bottom: 0;
+  margin-left: -1px;
+  position: absolute;
+  top: 0;
+  width: 2px;
+}

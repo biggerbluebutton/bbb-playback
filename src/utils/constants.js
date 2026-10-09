@@ -20,6 +20,7 @@ const EVENT_PREFIX = 'bbbplayback';
 
 const EVENTS = {
   TIME_UPDATE: `${EVENT_PREFIX}timeupdate`,
+  TOAST: `${EVENT_PREFIX}toast`,
 };
 
 const ID = {

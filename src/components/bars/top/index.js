@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Title from './title';
 import SearchButton from './buttons/search';
 import SectionButton from './buttons/section';
+import ShareButton from './buttons/share';
 import SwapButton from './buttons/swap';
 import ThemeButton from './buttons/theme';
 import { ID } from 'utils/constants';
@@ -32,22 +33,21 @@ const Top = ({
 }) => {
 
   return (
-    <div className="top-bar">
-      <div className="left">
+    <header className="top-bar">
+      <div className="start">
         <SectionButton
           section={section}
           toggleSection={toggleSection}
         />
-      </div>
-      <div className="center">
         <Title openAbout={() => openModal(ID.ABOUT)} />
       </div>
-      <div className="right">
-        <ThemeButton />
+      <div className="end">
+        <ShareButton />
         <SearchButton openSearch={() => openModal(ID.SEARCH)} />
         <SwapButton toggleSwap={toggleSwap} hidePresentation={hidePresentation} />
+        <ThemeButton />
       </div>
-    </div>
+    </header>
   );
 };
 

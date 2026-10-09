@@ -11,6 +11,7 @@ import Media from './media';
 import Modal from './modal';
 import BottomBar from 'components/bars/bottom';
 import TopBar from 'components/bars/top';
+import Toast from 'components/toast';
 import {
   play,
   seek,
@@ -18,7 +19,8 @@ import {
 } from 'utils/actions';
 import { ID } from 'utils/constants';
 import layout from 'utils/layout';
-import Shortcuts from 'utils/shortcuts';
+import player from 'utils/player';
+import Shortcuts, { addPlainShortcuts } from 'utils/shortcuts';
 import { useLayoutSwap } from 'components/utils/hooks';
 import './index.scss';
 
@@ -71,8 +73,19 @@ const Player = () => {
 
     shortcuts.current = new Shortcuts(actions);
 
+    const removePlainShortcuts = addPlainShortcuts({
+      backward: actions.seek.backward,
+      forward: actions.seek.forward,
+      fullscreen: actions.fullscreen,
+      mute: () => {
+        if (player.primary) player.primary.muted(!player.primary.muted());
+      },
+      play: actions.play,
+    });
+
     return () => {
       if (shortcuts.current) shortcuts.current.destroy();
+      removePlainShortcuts();
     };
   }, []);
 
@@ -116,6 +129,7 @@ const Player = () => {
         handleSearch={(value) => setSearch(value)}
         modal={modal}
       />
+      <Toast />
     </div>
   );
 };

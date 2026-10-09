@@ -164,7 +164,7 @@ const TldrawPresentationV2 = ({ size }) => {
       id={ID.PRESENTATION}
     >{!started
       ? <div className={cx('presentation', 'logo')} />
-      : <div className={'presentation'}
+      : <div className="presentation stage"
         style={{
           position: 'absolute',
           width: svgWidth < 0 ? 0 : svgWidth,

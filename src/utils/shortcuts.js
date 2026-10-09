@@ -87,4 +87,58 @@ export default class Shortcuts {
   }
 }
 
-export { matches };
+// Single key controls, like most video sites. They only apply when nothing
+// else would use the key: text fields, buttons and the video.js controls
+// keep their own keyboard behavior
+const PLAIN_KEYS = {
+  ' ': 'play',
+  k: 'play',
+  j: 'backward',
+  arrowleft: 'backward',
+  l: 'forward',
+  arrowright: 'forward',
+  f: 'fullscreen',
+  m: 'mute',
+};
+
+const INTERACTIVE = 'a, button, [role="button"], [role="slider"], .vjs-control-bar';
+
+const isFreeTarget = (target) => {
+  if (!target || target === document.body || target === document.documentElement) return true;
+  if (isEditable(target)) return false;
+  if (typeof target.closest !== 'function') return true;
+  if (target.closest(INTERACTIVE)) return false;
+
+  // Lists keep their own scrolling with the arrow keys
+  return !target.closest('[tabindex]') || !!target.closest('.video-js');
+};
+
+const getPlainAction = (event) => {
+  if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return null;
+  if (typeof event.key !== 'string') return null;
+  if (!isFreeTarget(event.target)) return null;
+
+  return PLAIN_KEYS[event.key.toLowerCase()] || null;
+};
+
+const addPlainShortcuts = (actions) => {
+  if (!config.enabled || config.plain === false) return () => {};
+
+  const handler = (event) => {
+    const name = getPlainAction(event);
+    if (!name || typeof actions[name] !== 'function') return;
+
+    event.preventDefault();
+    actions[name]();
+  };
+
+  document.addEventListener('keydown', handler);
+
+  return () => document.removeEventListener('keydown', handler);
+};
+
+export {
+  addPlainShortcuts,
+  getPlainAction,
+  matches,
+};

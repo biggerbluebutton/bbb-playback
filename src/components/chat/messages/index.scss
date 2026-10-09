@@ -4,10 +4,10 @@
   --gray-light-color: var(--gray-light);
   --gray-lightest-color: var(--gray-lightest);
   --highlight-color: var(--blue);
-  --color-text: #111;
-  --color-off-white: #F3F6F9;
-  --color-gray-lightest: #D4D9DF;
-  --color-danger-dark: #AE1010;
+  --color-text: var(--secondary-content-color);
+  --color-off-white: var(--secondary-highlight-color);
+  --color-gray-lightest: var(--gray-lightest);
+  --color-danger-dark: rgb(174, 16, 16);
 }
 
 .reply-tag {
@@ -23,6 +23,20 @@
 
 .text-vanilla {
   color: var(--color-text);
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  li,
+  pre {
+    // Each line follows its own language direction (e.g. English in an RTL page)
+    text-align: start;
+    unicode-bidi: plaintext;
+  }
 
   img {
     max-width: 100%;
@@ -170,6 +184,9 @@
   .text {
     box-sizing: border-box;
     overflow-wrap: break-word;
+    // Each message follows its own language direction (e.g. English in an RTL page)
+    text-align: start;
+    unicode-bidi: plaintext;
     width: 100%;
     white-space: pre-wrap;
 

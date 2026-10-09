@@ -8,6 +8,7 @@ const controls = {
   fullscreen: true,
   search: true,
   section: true,
+  share: true,
   swap: true,
   theme: true,
 };
@@ -51,6 +52,8 @@ const search = {
 
 const shortcuts = {
   enabled: true,
+  // Single key controls: Space/K, J/L, arrows, F and M
+  plain: true,
   fullscreen: 'K',
   play: 'Enter',
   section: 'L',

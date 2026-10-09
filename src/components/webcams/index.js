@@ -16,15 +16,30 @@ import {
   getFrequency,
   getTime,
 } from 'utils/params';
+import { formatTime } from 'utils/format';
+import {
+  getMediaPreferences,
+  saveMediaPreferences,
+} from 'utils/preferences';
 import progress from 'utils/progress';
+import notify from 'utils/toast';
 import storage from 'utils/data/storage';
 import player from 'utils/player';
+import { renderSlideMarkers } from './markers';
 import './index.scss';
 
 const intlMessages = defineMessages({
   aria: {
     id: 'player.webcams.wrapper.aria',
     description: 'Aria label for the webcams wrapper',
+  },
+  resumed: {
+    id: 'player.resume.message',
+    description: 'Message shown when playback resumes where the viewer left off',
+  },
+  restart: {
+    id: 'player.resume.restart',
+    description: 'Button to start the recording from the beginning',
   },
 });
 
@@ -69,7 +84,7 @@ const buildOptions = (sources, tracks) => {
   return {
     controlBar: {
       fullscreenToggle: false,
-      pictureInPictureToggle: false,
+      pictureInPictureToggle: !storage.fallback && document.pictureInPictureEnabled === true,
       volumePanel: {
         inline: false,
         vertical: true,
@@ -111,6 +126,21 @@ const Webcams = () => {
       player.webcams = videojs(video, buildOptions(sources, tracks), () => {
         const recordId = storage.metadata.id;
 
+        const preferences = getMediaPreferences(config.rates);
+        if (preferences.volume !== null) player.webcams.volume(preferences.volume);
+        if (preferences.muted) player.webcams.muted(true);
+
+        player.webcams.on('volumechange', () => {
+          saveMediaPreferences({
+            muted: player.webcams.muted(),
+            volume: player.webcams.volume(),
+          });
+        });
+
+        player.webcams.on('ratechange', () => {
+          saveMediaPreferences({ rate: player.webcams.playbackRate() });
+        });
+
         player.webcams.on('play', () => {
           if (interval.current) clearInterval(interval.current);
           const frequency = getFrequency();
@@ -141,7 +171,9 @@ const Webcams = () => {
         player.webcams.on('ended', () => progress.clear(recordId));
 
         // Restore position: URL time param takes priority, then localStorage
-        player.webcams.on('loadedmetadata', () => {
+        player.webcams.one('loadedmetadata', () => {
+          if (preferences.rate !== null) player.webcams.playbackRate(preferences.rate);
+
           const duration = player.webcams.duration();
           const urlTime = getTime();
           if (urlTime !== null && urlTime < duration) {
@@ -150,13 +182,27 @@ const Webcams = () => {
             const savedTime = progress.load(recordId);
             if (savedTime && savedTime < duration) {
               player.webcams.currentTime(savedTime);
+              notify({
+                action: {
+                  label: intl.formatMessage(intlMessages.restart),
+                  onClick: () => {
+                    player.webcams.currentTime(0);
+                    progress.clear(recordId);
+                  },
+                },
+                duration: 8000,
+                message: intl.formatMessage(intlMessages.resumed, { time: formatTime(savedTime) }),
+              });
             }
           }
         });
+
+        player.webcams.on('loadedmetadata', () => renderSlideMarkers(player.webcams));
       });
       logger.debug(ID.WEBCAMS, 'mounted');
     }
-  }, []);
+    // The video.js player is created once; the locale cannot change meanwhile
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {

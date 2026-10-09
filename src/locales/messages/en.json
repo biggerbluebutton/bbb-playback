@@ -48,5 +48,16 @@
   "player.search.modal.title": "Search",
   "player.search.modal.subtitle": "Find presentation slides content",
   "player.thumbnails.wrapper.aria": "Thumbnails area",
-  "player.webcams.wrapper.aria": "Webcams area"
+  "player.webcams.wrapper.aria": "Webcams area",
+  "button.share.aria": "Copy link at current time",
+  "button.theme.dark.aria": "Switch to dark theme",
+  "button.theme.light.aria": "Switch to light theme",
+  "player.meta.participants": "{count, plural, one {# participant} other {# participants}}",
+  "player.share.copied": "Link copied · starts at {time}",
+  "player.share.failed": "Couldn't copy the link",
+  "player.resume.message": "Resumed at {time}",
+  "player.resume.restart": "Start over",
+  "player.about.modal.shortcuts.mute": "Mute/Unmute",
+  "player.about.modal.shortcuts.quick": "Quick keys",
+  "player.about.modal.shortcuts.or": "or"
 }

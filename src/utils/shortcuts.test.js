@@ -1,4 +1,8 @@
-import Shortcuts, { matches } from './shortcuts';
+import Shortcuts, {
+  addPlainShortcuts,
+  getPlainAction,
+  matches,
+} from './shortcuts';
 
 const press = (init, target = document.body) => {
   const event = new KeyboardEvent('keydown', {
@@ -78,5 +82,55 @@ describe('Shortcuts', () => {
     shortcuts.destroy();
     press({ key: 'K', code: 'KeyK' });
     expect(fullscreen).not.toHaveBeenCalled();
+  });
+});
+
+describe('plain shortcuts', () => {
+  const event = (key, target = document.body, init = {}) => ({ key, target, ...init });
+
+  it('maps single keys to actions', () => {
+    expect(getPlainAction(event(' '))).toBe('play');
+    expect(getPlainAction(event('K'))).toBe('play');
+    expect(getPlainAction(event('ArrowLeft'))).toBe('backward');
+    expect(getPlainAction(event('l'))).toBe('forward');
+    expect(getPlainAction(event('f'))).toBe('fullscreen');
+    expect(getPlainAction(event('m'))).toBe('mute');
+    expect(getPlainAction(event('x'))).toBe(null);
+  });
+
+  it('ignores modified keys', () => {
+    expect(getPlainAction(event('k', document.body, { altKey: true }))).toBe(null);
+    expect(getPlainAction(event('k', document.body, { ctrlKey: true }))).toBe(null);
+  });
+
+  it('leaves text fields, buttons and lists alone', () => {
+    const input = document.createElement('input');
+    const button = document.createElement('button');
+    const list = document.createElement('div');
+    list.setAttribute('tabindex', '0');
+
+    expect(getPlainAction(event(' ', input))).toBe(null);
+    expect(getPlainAction(event(' ', button))).toBe(null);
+    expect(getPlainAction(event('ArrowLeft', list))).toBe(null);
+  });
+
+  it('works on the video element', () => {
+    const player = document.createElement('div');
+    player.className = 'video-js';
+    player.setAttribute('tabindex', '-1');
+
+    expect(getPlainAction(event('k', player))).toBe('play');
+  });
+
+  it('dispatches and cleans up', () => {
+    const play = jest.fn();
+    const remove = addPlainShortcuts({ play });
+
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', bubbles: true }));
+    expect(play).toHaveBeenCalledTimes(1);
+
+    remove();
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', bubbles: true }));
+    expect(play).toHaveBeenCalledTimes(1);
   });
 });

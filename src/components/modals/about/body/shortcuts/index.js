@@ -18,6 +18,15 @@ const SHORTCUTS = [
   'swap',
 ];
 
+// Single key controls, see addPlainShortcuts
+const PLAIN_SHORTCUTS = [
+  { label: 'play', keys: ['Space', 'K'] },
+  { label: 'seek.backward', keys: ['←', 'J'] },
+  { label: 'seek.forward', keys: ['→', 'L'] },
+  { label: 'fullscreen', keys: ['F'] },
+  { label: 'mute', keys: ['M'] },
+];
+
 const getCode = (shortcut) => {
   const path = shortcut.split('.');
 
@@ -74,6 +83,18 @@ const intlMessages = defineMessages({
     id: 'player.about.modal.shortcuts.swap',
     description: 'Label for the about modal swap shortcut',
   },
+  'mute': {
+    id: 'player.about.modal.shortcuts.mute',
+    description: 'Label for the about modal mute shortcut',
+  },
+  quick: {
+    id: 'player.about.modal.shortcuts.quick',
+    description: 'Heading for the single key shortcuts',
+  },
+  or: {
+    id: 'player.about.modal.shortcuts.or',
+    description: 'Separator between alternative keys',
+  },
 });
 
 const Shortcuts = () => {
@@ -86,10 +107,37 @@ const Shortcuts = () => {
       </div>
       <div className="list">
         <div className="content">
+          {config.plain !== false ? (
+            <>
+              <div className="group">
+                {intl.formatMessage(intlMessages.quick)}
+              </div>
+              {PLAIN_SHORTCUTS.map(({ label, keys }) => (
+                <div className="shortcut" key={`plain-${label}`}>
+                  <div className="label">
+                    {intl.formatMessage(intlMessages[label])}
+                  </div>
+                  <div className="keys">
+                    {keys.map((key, index) => (
+                      <React.Fragment key={key}>
+                        {index > 0 ? (
+                          <span className="or">{intl.formatMessage(intlMessages.or)}</span>
+                        ) : null}
+                        <Key code={key} />
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <div className="group">
+                {intl.formatMessage(intlMessages.alt)} + {intl.formatMessage(intlMessages.shift)}
+              </div>
+            </>
+          ) : null}
           {SHORTCUTS.map(shortcut => {
 
             return (
-              <div className="shortcut">
+              <div className="shortcut" key={shortcut}>
                 <div className="label">
                   {intl.formatMessage(intlMessages[shortcut])}
                 </div>

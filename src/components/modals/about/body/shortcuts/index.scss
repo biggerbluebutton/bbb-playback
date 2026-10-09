@@ -26,6 +26,7 @@
     bottom: 0;
     box-sizing: border-box;
     display: flex;
+    flex-direction: column;
     font-size: small;
     overflow-x: hidden;
     overflow-y: auto;
@@ -34,6 +35,24 @@
     scroll-behavior: smooth;
     top: 0;
     width: 100%;
+
+    .group {
+      color: var(--muted-content-color);
+      font-size: x-small;
+      font-weight: var(--font-weight-semi-bold);
+      padding: $padding-small 0 $padding-extra-small 0;
+      text-transform: uppercase;
+
+      &:first-child {
+        padding-top: 0;
+      }
+    }
+
+    .or {
+      color: var(--muted-content-color);
+      font-size: xx-small;
+      padding: 0 $padding-extra-small;
+    }
 
     .shortcut {
       box-sizing: border-box;

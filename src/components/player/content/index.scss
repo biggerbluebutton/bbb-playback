@@ -1,5 +1,9 @@
 @import 'src/styles/sizes';
 
+$stage-gap: 1rem;
+$stage-gap-small: .5rem;
+$stage-radius: .5rem;
+
 :root {
   --top-content-background-color: var(--primary-background-color);
   --top-content-color: var(--primary-content-color);
@@ -57,6 +61,26 @@
     display: none;
   }
 
+  // The slide sits on the canvas as a card with some breathing room
+  .top-content .presentation-wrapper {
+    bottom: $stage-gap;
+    height: auto;
+    left: $stage-gap;
+    right: $stage-gap;
+    top: $stage-gap;
+    width: auto;
+  }
+
+  .presentation.stage {
+    border-radius: $stage-radius;
+    box-shadow: var(--stage-shadow);
+    overflow: hidden;
+  }
+
+  .presentation:not(.logo) > svg {
+    filter: drop-shadow(0 4px 12px var(--shadow-color));
+  }
+
   .video-js {
     background-color: var(--top-content-background-color);
   }
@@ -64,6 +88,13 @@
 
 .swapped-content {
   grid-area: media;
+
+  .top-content .presentation-wrapper {
+    bottom: $stage-gap-small;
+    left: $stage-gap-small;
+    right: $stage-gap-small;
+    top: $stage-gap-small;
+  }
 
   .top-content {
     background-color: var(--media-background-color);

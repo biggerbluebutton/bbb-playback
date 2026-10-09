@@ -41,6 +41,7 @@ const Item = ({
           height={item.height}
           index={index}
           src={item.src}
+          timestamp={item.timestamp}
           width={item.width}
         />
       </div>
@@ -66,6 +67,7 @@ const Item = ({
         height={item.height}
         index={index}
         src={item.src}
+        timestamp={item.timestamp}
         width={item.width}
       />
     </div>

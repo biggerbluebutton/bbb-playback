@@ -85,7 +85,9 @@ When no URL is provided, the dev server starts normally without any proxy.
   - `fullscreen`
   - `search`
   - `section`
+  - `share`: copy a link that opens the recording at the current time
   - `swap`
+  - `theme`: light/dark theme; follows the system preference until the viewer picks one
   - `thumbnails`
 
 - locale:
@@ -96,6 +98,9 @@ When no URL is provided, the dev server starts normally without any proxy.
   - `rates`: speed rates
 
 - shortcuts: alt + shift
+  - `plain`: also enable single key controls [`true`|`false`]
+    - `Space`/`K`: play/pause, `←`/`J`: seek backwards, `→`/`L`: seek forwards,
+      `F`: toggle fullscreen, `M`: mute
   - `fullscreen`: `K`
   - `play/pause`: `Enter`
   - `section`: `L`
