@@ -27,6 +27,7 @@ import notify from 'utils/toast';
 import storage from 'utils/data/storage';
 import player from 'utils/player';
 import { renderSlideMarkers } from './markers';
+import setupCaptionTranslation from './translation';
 import './index.scss';
 
 const intlMessages = defineMessages({
@@ -41,6 +42,18 @@ const intlMessages = defineMessages({
   restart: {
     id: 'player.resume.restart',
     description: 'Button to start the recording from the beginning',
+  },
+  autoTranslated: {
+    id: 'player.captions.auto',
+    description: 'Suffix for machine translated caption languages',
+  },
+  translating: {
+    id: 'player.captions.translating',
+    description: 'Message shown while captions are being translated',
+  },
+  translateFailed: {
+    id: 'player.captions.failed',
+    description: 'Message shown when captions could not be translated',
   },
 });
 
@@ -210,6 +223,13 @@ const Webcams = () => {
         });
 
         player.webcams.on('loadedmetadata', () => renderSlideMarkers(player.webcams));
+
+        setupCaptionTranslation(player.webcams, {
+          label: intl.formatMessage(intlMessages.autoTranslated),
+          locale: intl.locale,
+          onFailed: (language) => notify({ message: intl.formatMessage(intlMessages.translateFailed, { language }) }),
+          onStart: (language) => notify({ message: intl.formatMessage(intlMessages.translating, { language }) }),
+        });
       });
       logger.debug(ID.WEBCAMS, 'mounted');
     });

@@ -59,5 +59,8 @@
   "player.resume.restart": "Start over",
   "player.about.modal.shortcuts.mute": "Mute/Unmute",
   "player.about.modal.shortcuts.quick": "Quick keys",
-  "player.about.modal.shortcuts.or": "or"
+  "player.about.modal.shortcuts.or": "or",
+  "player.captions.auto": "auto-translated",
+  "player.captions.translating": "Translating captions into {language}…",
+  "player.captions.failed": "Couldn't translate captions into {language}"
 }

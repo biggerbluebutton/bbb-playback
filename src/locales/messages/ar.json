@@ -59,5 +59,8 @@
   "player.resume.restart": "البدء من جديد",
   "player.about.modal.shortcuts.mute": "كتم / إلغاء كتم الصوت",
   "player.about.modal.shortcuts.quick": "مفاتيح سريعة",
-  "player.about.modal.shortcuts.or": "أو"
+  "player.about.modal.shortcuts.or": "أو",
+  "player.captions.auto": "ترجمة آلية",
+  "player.captions.translating": "جارٍ ترجمة التعليقات إلى {language}…",
+  "player.captions.failed": "تعذّرت ترجمة التعليقات إلى {language}"
 }

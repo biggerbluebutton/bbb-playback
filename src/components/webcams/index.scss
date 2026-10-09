@@ -125,3 +125,54 @@ $big-play-button-size: 2em;
   top: 0;
   width: 2px;
 }
+
+// Control bar menus (captions, speed). The webcams player is small, so the
+// video.js size based limits would squeeze long lists like caption languages
+.video-js .vjs-control-bar .vjs-menu-button-popup .vjs-menu {
+  margin-bottom: 0;
+  max-width: calc(100vw - 2em);
+  width: 22em;
+
+  .vjs-menu-content {
+    background-color: rgba(22, 27, 34, .96);
+    border-radius: $border-radius * 1.5;
+    bottom: 3.6em;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+    font-family: var(--font-family);
+    max-height: min(26em, 60vh);
+    overflow-y: auto;
+    padding: .35em 0;
+  }
+
+  li {
+    font-size: 1.25em;
+    line-height: 1.4;
+    overflow: hidden;
+    padding: .45em 1em;
+    text-align: start;
+    text-overflow: ellipsis;
+    text-transform: none;
+    white-space: nowrap;
+  }
+
+  li.vjs-menu-item:hover,
+  li.vjs-menu-item:focus {
+    background-color: rgba(255, 255, 255, .12);
+  }
+
+  li.vjs-selected,
+  li.vjs-selected:hover,
+  li.vjs-selected:focus {
+    background-color: var(--blue);
+    color: var(--white);
+  }
+}
+
+// The speed menu stays compact
+.video-js .vjs-control-bar .vjs-playback-rate .vjs-menu {
+  width: 6em;
+
+  li {
+    text-align: center;
+  }
+}

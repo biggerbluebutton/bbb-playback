@@ -1,3 +1,15 @@
+const captions = {
+  // Offer the recording captions in other languages, translated on demand.
+  // Without a url, Chrome's built-in on-device translator is used when the
+  // browser has one. With a url, any LibreTranslate compatible service
+  translate: {
+    enabled: true,
+    key: null,
+    languages: ['ar', 'de', 'en', 'es', 'fa', 'fr', 'hi', 'id', 'it', 'ja', 'ko', 'nl', 'pt', 'ru', 'tr', 'uk', 'ur', 'zh'],
+    url: null,
+  },
+};
+
 const chat = {
   align: 'bottom',
   scroll: true,
@@ -81,6 +93,7 @@ const thumbnails = {
 };
 
 export {
+  captions,
   chat,
   controls,
   date,

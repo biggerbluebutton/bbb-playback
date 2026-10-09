@@ -76,6 +76,15 @@ When no URL is provided, the dev server starts normally without any proxy.
 
 ## Configuration
 
+- captions:
+  - `translate`: offer the recording captions in more languages in the CC menu,
+    translated when the viewer selects one
+    - `enabled`: [`true`|`false`]
+    - `languages`: languages to offer, besides the viewer's own language
+    - `url`: a LibreTranslate compatible `/translate` endpoint. When empty, the
+      browser's built-in on-device translator is used where available (Chrome)
+    - `key`: optional API key sent to `url`
+
 - chat:
   - `scroll`: automatic scroll [`true`|`false`]
   - `align`: scroll align [`top`|`middle`|`bottom`]
