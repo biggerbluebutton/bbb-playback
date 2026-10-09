@@ -8,6 +8,7 @@
   --gray-lightest: rgb(212, 217, 223);
 
   --blue: rgb(15, 112, 215);
+  --blue-soft: rgba(15, 112, 215, .12);
 
   --red: rgb(223, 39, 33);
 
@@ -16,19 +17,58 @@
   --white-dark: rgb(243, 246, 249);
   --white: rgb(255, 255, 255);
 
-  --primary-background-color: var(--white-dark);
-  --primary-highlight-color: var(--gray-lightest);
-  --primary-content-color: var(--gray-dark);
+  // App canvas, bars
+  --primary-background-color: rgb(241, 244, 248);
+  --primary-highlight-color: rgb(226, 232, 240);
+  --primary-content-color: rgb(30, 41, 59);
 
+  // Panels: media, chat, notes, modals
   --secondary-background-color: var(--white);
-  --secondary-highlight-color: var(--gray-lightest);
-  --secondary-content-color: var(--gray-dark);
+  --secondary-highlight-color: rgb(238, 242, 246);
+  --secondary-content-color: rgb(30, 41, 59);
 
-  --tertiary-background-color: var(--gray-lightest);
-  --tertiary-highlight-color: var(--gray-lighter);
-  --tertiary-content-color: var(--gray-dark);
+  // Strips: thumbnails, panel tabs
+  --tertiary-background-color: rgb(232, 237, 243);
+  --tertiary-highlight-color: rgb(218, 225, 234);
+  --tertiary-content-color: rgb(51, 65, 85);
 
-  --border-color: rgba(6, 23, 42, .1);
+  --muted-content-color: rgb(100, 116, 139);
+  --border-color: rgba(15, 23, 42, .08);
   --focus-ring-color: var(--blue);
-  --shadow-color: rgba(6, 23, 42, .18);
+  --shadow-color: rgba(15, 23, 42, .16);
+  --stage-shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 8px 24px rgba(15, 23, 42, .1);
+
+  color-scheme: light;
+}
+
+@mixin dark-theme {
+  --gray-light: rgb(120, 133, 150);
+  --gray-lighter: rgb(70, 81, 96);
+  --gray-lightest: rgb(48, 56, 68);
+
+  --blue: rgb(59, 142, 234);
+  --blue-soft: rgba(59, 142, 234, .18);
+
+  --primary-background-color: rgb(14, 17, 22);
+  --primary-highlight-color: rgb(36, 42, 52);
+  --primary-content-color: rgb(230, 234, 240);
+
+  --secondary-background-color: rgb(22, 27, 34);
+  --secondary-highlight-color: rgb(31, 38, 48);
+  --secondary-content-color: rgb(226, 231, 238);
+
+  --tertiary-background-color: rgb(27, 33, 42);
+  --tertiary-highlight-color: rgb(42, 50, 62);
+  --tertiary-content-color: rgb(203, 211, 221);
+
+  --muted-content-color: rgb(139, 151, 167);
+  --border-color: rgba(255, 255, 255, .08);
+  --shadow-color: rgba(0, 0, 0, .5);
+  --stage-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 28px rgba(0, 0, 0, .45);
+
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] {
+  @include dark-theme;
 }
