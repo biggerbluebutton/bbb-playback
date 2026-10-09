@@ -1,4 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, {
+  Suspense,
+  lazy,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useParams } from "react-router-dom";
 import {
   defineMessages,
@@ -7,7 +13,6 @@ import {
 import Data from './data';
 import Dots from './dots';
 import Error from 'components/error';
-import Player from 'components/player';
 import {
   ERROR,
   ID,
@@ -28,11 +33,14 @@ const intlMessages = defineMessages({
   },
 });
 
-const FEEDBACK = 1 * 1000;
+// The player chunk (video.js and friends) is downloaded while the recording
+// data is being fetched instead of after it
+const importPlayer = () => import('components/player');
+const Player = lazy(importPlayer);
 
 const initError = (recordId) => recordId ? null : ERROR.BAD_REQUEST;
 
-const Loader = ({ match }) => {
+const Loader = () => {
   const intl = useIntl();
   const params = useParams();
   const recordId = useRef(parseRecordId(params));
@@ -42,33 +50,39 @@ const Loader = ({ match }) => {
   const [, setUpdate] = useState(0);
   const [loaded, setLoaded] = useState(false);
 
+  useEffect(() => {
+    if (!recordId.current) return;
+
+    const onError = (error) => {
+      logger.error('loader', 'error', error);
+      setError(error);
+    };
+
+    const onUpdate = (data) => {
+      logger.debug('loader', 'update', data);
+      counter.current += 1;
+      setUpdate(counter.current);
+    };
+
+    const onLoaded = () => {
+      logger.debug('loader', 'loaded');
+      setLoaded(true);
+    };
+
+    importPlayer().catch(error => logger.error('loader', 'player', error));
+    storage.fetch(recordId.current, onUpdate, onLoaded, onError);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+
+    const { name } = storage.metadata || {};
+    if (name) document.title = name;
+  }, [loaded]);
+
   if (error) return <Error code={error} />;
 
-  const onError = (error) => {
-    logger.error('loader', 'error', error);
-    setError(error);
-  };
-
-  const onUpdate = (data) => {
-    logger.debug('loader', 'update', data);
-    counter.current += 1;
-    setUpdate(counter.current);
-  };
-
-  const onLoaded = () => {
-    logger.debug('loader', 'loaded');
-    setTimeout(() => setLoaded(true), FEEDBACK);
-  };
-
-  storage.fetch(recordId.current, onUpdate, onLoaded, onError);
-
-  if (loaded) {
-    layout.mode = getLayout();
-
-    return <Player />;
-  }
-
-  return (
+  const loader = (
     <div
       aria-label={intl.formatMessage(intlMessages.aria)}
       className="loader-wrapper"
@@ -83,6 +97,18 @@ const Loader = ({ match }) => {
       </div>
     </div>
   );
+
+  if (loaded) {
+    layout.mode = getLayout();
+
+    return (
+      <Suspense fallback={loader}>
+        <Player />
+      </Suspense>
+    );
+  }
+
+  return loader;
 };
 
 export default Loader;

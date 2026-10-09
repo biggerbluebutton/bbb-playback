@@ -1,8 +1,6 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import cx from 'classnames';
 import Presentation from 'components/presentation';
-import TldrawPresentation from 'components/tldraw';
-import TldrawPresentationV2 from 'components/tldraw_v2';
 import { getTldrawBbbVersion, isTldrawWhiteboard as isTldraw } from 'utils/tldraw';
 import { useCurrentInterval, useLayoutSwap } from 'components/utils/hooks';
 import Screenshare from 'components/screenshare';
@@ -14,6 +12,17 @@ import layout from 'utils/layout';
 import storage from 'utils/data/storage';
 import './index.scss';
 import { gte as semverGte } from 'semver';
+
+// The whiteboard renderers are heavy and a recording only ever needs one of
+// them, so each is split into its own chunk and fetched on demand
+const TldrawPresentation = lazy(() => import('components/tldraw'));
+const TldrawPresentationV2 = lazy(() => import('components/tldraw_v2'));
+
+const PresentationFallback = () => (
+  <div className="presentation-wrapper">
+    <div className={cx('presentation', 'logo')} />
+  </div>
+);
 
 const Content = ({
   fullscreen,
@@ -58,7 +67,9 @@ const Content = ({
         toggleFullscreen={toggleFullscreen}
       />
       <div className="top-content">
-        {presentation}
+        <Suspense fallback={<PresentationFallback />}>
+          {presentation}
+        </Suspense>
         {layout.screenshare ? (
           // video-js doesn't mount properly when not mounted in time
           <span style={!showScreenshare ? {

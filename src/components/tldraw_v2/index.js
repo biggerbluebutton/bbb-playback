@@ -19,11 +19,11 @@ import './index.scss';
 import {
   getTldrawData, getViewBox, createTldrawImageAsset,
   createTldrawBackgroundShape, createTldrawCursorShape,
-  setupColorThemePaletteOverrides
 } from 'utils/tldraw';
 import { buildFileURL } from 'utils/data';
 import { isEmpty } from 'utils/data/validators';
 import getCursor from './cursor';
+import setupColorThemePaletteOverrides from './palette';
 
 const MAX_IMAGE_WIDTH = 1440;
 const MAX_IMAGE_HEIGHT = 1080;

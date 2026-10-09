@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   defineMessages,
   useIntl,
 } from 'react-intl';
-import {
-  enable,
-  disable,
-} from 'darkreader';
 import Button from 'components/utils/button';
 import { controls as config } from 'config';
 import { THEME } from 'utils/constants';
 import layout from 'utils/layout';
+import logger from 'utils/logger';
 
 const intlMessages = defineMessages({
   theme: {
@@ -66,16 +63,47 @@ const fixes = {
   ignoreInlineStyle,
 };
 
+const STORAGE_KEY = 'bbb-playback-theme';
+
+const loadTheme = () => {
+  try {
+    return localStorage.getItem(STORAGE_KEY) === THEME.DARK;
+  } catch (error) {
+    return false;
+  }
+};
+
+const saveTheme = (dark) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, dark ? THEME.DARK : THEME.LIGHT);
+  } catch (error) {
+    logger.warn('theme', 'failed to save', error);
+  }
+};
+
+// Dark Reader is only needed by viewers that opt into the dark theme, so it
+// is kept out of the main bundle
+const applyTheme = (dark) => import('darkreader').then(({ enable, disable }) => {
+  dark ? enable(themeOptions, fixes) : disable();
+}).catch(error => logger.error('theme', error));
+
 const Theme = () => {
   const intl = useIntl();
-  const [dark, setDark] = useState(false);
+  const enabled = layout.control && config.theme;
+  const [dark, setDark] = useState(() => enabled && loadTheme());
+
+  useEffect(() => {
+    if (dark) applyTheme(true);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleTheme = () => {
-    dark ? disable() : enable(themeOptions, fixes);
-    setDark(prevDark => !prevDark);
+    const nextDark = !dark;
+    applyTheme(nextDark);
+    saveTheme(nextDark);
+    setDark(nextDark);
   };
 
-  if (!layout.control || !config.theme) return null;
+  if (!enabled) return null;
 
   return (
     <Button
