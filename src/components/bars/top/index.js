@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Status from './status';
 import Title from './title';
 import SearchButton from './buttons/search';
 import SectionButton from './buttons/section';
@@ -42,6 +43,7 @@ const Top = ({
         <Title openAbout={() => openModal(ID.ABOUT)} />
       </div>
       <div className="end">
+        <Status />
         <ShareButton />
         <SearchButton openSearch={() => openModal(ID.SEARCH)} />
         <SwapButton toggleSwap={toggleSwap} hidePresentation={hidePresentation} />

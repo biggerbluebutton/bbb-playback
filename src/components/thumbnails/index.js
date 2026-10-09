@@ -21,6 +21,12 @@ import {
 import { buildThumbnailItems } from './utils';
 import './index.scss';
 
+const getRecordingEnd = () => {
+  const { start, end } = storage.metadata || {};
+
+  return (end - start) / 1000;
+};
+
 const intlMessages = defineMessages({
   aria: {
     id: 'player.thumbnails.wrapper.aria',
@@ -99,6 +105,7 @@ const Thumbnails = ({
           result.push(
             <Item
               active={active}
+              end={items[index + 1] ? items[index + 1].timestamp : getRecordingEnd()}
               index={index}
               key={item.id ?? index}
               interactive={interactive}

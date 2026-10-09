@@ -68,10 +68,7 @@ const Title = ({ openAbout }) => {
       {details.length > 0 ? (
         <span className="meta">
           {details.map((detail, index) => (
-            <React.Fragment key={index}>
-              {index > 0 ? <span aria-hidden="true" className="separator">·</span> : null}
-              {detail}
-            </React.Fragment>
+            <span className="chip" key={index}>{detail}</span>
           ))}
         </span>
       ) : null}

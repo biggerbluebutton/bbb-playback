@@ -3,7 +3,7 @@
 :root {
   --application-background-color: var(--secondary-background-color);
   --application-color: var(--secondary-content-color);
-  --application-control-background-color: var(--tertiary-background-color);
+  --application-control-background-color: var(--secondary-background-color);
   --application-control-color: var(--tertiary-content-color);
 }
 
@@ -22,14 +22,14 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: row-reverse;
-    gap: $margin-extra-small;
-    padding: $padding-extra-small $padding-small;
+    gap: $margin-small;
+    padding: $padding-small;
 
     .application-icon {
       align-items: center;
       background: none;
       border: none;
-      border-radius: $border-radius;
+      border-radius: 999px;
       box-sizing: border-box;
       color: var(--application-control-color);
       display: flex;
@@ -37,43 +37,33 @@
       font-size: large;
       font-weight: var(--font-weight-semi-bold);
       justify-content: center;
-      opacity: 1;
       outline: none;
       overflow: hidden;
-      padding: $padding-small;
-      position: relative;
+      padding: $padding-small $padding;
       transition:
         background-color var(--transition-duration) ease,
-        opacity var(--transition-duration) ease;
-
-      // Active tab indicator
-      &::after {
-        background-color: var(--focus-ring-color);
-        border-radius: $border-width-small;
-        bottom: 0;
-        content: '';
-        height: $border-width-small;
-        left: $padding-small;
-        position: absolute;
-        right: $padding-small;
-      }
+        box-shadow var(--transition-duration) ease,
+        color var(--transition-duration) ease;
 
       &:focus-visible {
-        box-shadow: inset 0 0 0 $focus-ring-width var(--focus-ring-color);
+        box-shadow: 0 0 0 $focus-ring-width var(--focus-ring-color);
       }
+    }
+
+    // Selected panel: gradient pill
+    .application-icon:not(.inactive) {
+      background: var(--accent-gradient);
+      box-shadow: 0 6px 16px -8px var(--accent-glow);
+      color: var(--white);
     }
 
     .inactive {
       cursor: pointer;
-      opacity: .55;
-
-      &::after {
-        display: none;
-      }
+      opacity: .7;
 
       &:hover {
-        background-color: var(--tertiary-highlight-color);
-        opacity: .85;
+        background-color: var(--blue-soft);
+        opacity: 1;
       }
     }
   }

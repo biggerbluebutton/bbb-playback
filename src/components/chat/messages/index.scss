@@ -181,21 +181,22 @@
     }
   }
 
+  // Message bubble
   .text {
+    background-color: var(--secondary-highlight-color);
+    border-radius: .25rem .9rem .9rem .9rem;
     box-sizing: border-box;
+    max-width: 100%;
     overflow-wrap: break-word;
+    padding: .4rem .7rem;
     // Each message follows its own language direction (e.g. English in an RTL page)
     text-align: start;
     unicode-bidi: plaintext;
-    width: 100%;
     white-space: pre-wrap;
-
-    [dir="ltr"] & {
-      padding: 0 $padding-extra-small 0 0;
-    }
+    width: fit-content;
 
     [dir="rtl"] & {
-      padding: 0 0 0 $padding-extra-small;
+      border-radius: .9rem .25rem .9rem .9rem;
     }
   }
 

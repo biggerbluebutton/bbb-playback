@@ -28,11 +28,14 @@ $error-content-max-width: 28rem;
 }
 
 .error-code {
+  -webkit-background-clip: text;
+  background: var(--accent-gradient);
+  background-clip: text;
+  color: transparent;
   font-size: $error-code-font-size;
   font-weight: var(--font-weight-bold);
   letter-spacing: -.02em;
   line-height: 1;
-  opacity: .2;
 }
 
 .error-title {
@@ -48,7 +51,9 @@ $error-content-max-width: 28rem;
 }
 
 .error-retry {
-  background-color: var(--error-button-background-color);
+  background: var(--error-button-background-color);
+  background: var(--accent-gradient);
+  box-shadow: 0 8px 20px -8px var(--accent-glow);
   border: none;
   border-radius: $border-radius;
   color: var(--error-button-color);

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
+import Progress from './progress';
 import Thumbnail from './thumbnail';
 import { handleOnKeyActivation } from 'utils/data/handlers';
 import player from 'utils/player';
@@ -8,6 +9,7 @@ import './index.scss';
 
 const propTypes = {
   active: PropTypes.bool,
+  end: PropTypes.number,
   index: PropTypes.number,
   interactive: PropTypes.bool,
   item: PropTypes.object,
@@ -16,6 +18,7 @@ const propTypes = {
 
 const defaultProps = {
   active: false,
+  end: undefined,
   index: 0,
   interactive: false,
   item: {},
@@ -24,6 +27,7 @@ const defaultProps = {
 
 const Item = ({
   active,
+  end,
   index,
   interactive,
   item,
@@ -70,6 +74,7 @@ const Item = ({
         timestamp={item.timestamp}
         width={item.width}
       />
+      {active ? <Progress end={end} start={item.timestamp} /> : null}
     </div>
   );
 };

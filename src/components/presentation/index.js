@@ -34,6 +34,10 @@ const buildViewBoxAttr = (viewBox) => {
   return `${x} ${y} ${width} ${height}`;
 };
 
+// Rounded slide corners, proportional to the visible area so they look the
+// same at any zoom level
+const getCornerRadius = ({ width, height }) => Math.min(width, height) * 0.02;
+
 const getViewBox = (index) => {
   const inactive = {
     height: 0,
@@ -78,6 +82,7 @@ const Presentation = () => {
             <clipPath id="viewBox">
               <rect
                 height={viewBox.height}
+                rx={getCornerRadius(viewBox)}
                 x={viewBox.x}
                 width={viewBox.width}
                 y={viewBox.y}

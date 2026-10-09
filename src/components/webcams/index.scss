@@ -1,10 +1,12 @@
 @import 'src/styles/sizes';
 
 :root {
-  --control-bar-background-color: var(--gray-dark);
-  --big-play-button-background-color: var(--blue);
+  --control-bar-background-color: rgba(13, 17, 28, .92);
+  --big-play-button-background-color: var(--accent-color);
+  --big-play-button-background: var(--accent-gradient);
   --big-play-button-color: var(--white);
-  --progress-color: var(--blue);
+  --progress-color: var(--accent-color);
+  --progress-background: var(--accent-gradient);
 }
 
 // Relative to the video.js big play button font size
@@ -31,10 +33,12 @@ $big-play-button-size: 2em;
 }
 
 .video-js .vjs-big-play-button {
-  background-color: var(--big-play-button-background-color);
+  animation: play-pulse 2.4s ease-out infinite;
+  background: var(--big-play-button-background-color);
+  background: var(--big-play-button-background);
   border: none;
   border-radius: 50%;
-  box-shadow: 0 4px 16px var(--shadow-color);
+  box-shadow: 0 10px 30px -6px var(--accent-glow);
   color: var(--big-play-button-color);
   height: $big-play-button-size;
   left: 50%;
@@ -48,7 +52,8 @@ $big-play-button-size: 2em;
 
 .video-js:hover .vjs-big-play-button,
 .video-js .vjs-big-play-button:focus {
-  background-color: var(--big-play-button-background-color);
+  background: var(--big-play-button-background-color);
+  background: var(--big-play-button-background);
   filter: brightness(1.1);
   transform: translate(-50%, -50%) scale(1.06);
   transition: transform var(--transition-duration) ease, filter var(--transition-duration) ease;
@@ -56,7 +61,48 @@ $big-play-button-size: 2em;
 
 .video-js .vjs-play-progress,
 .video-js .vjs-volume-level {
-  background-color: var(--progress-color);
+  background: var(--progress-color);
+  background: var(--progress-background);
+}
+
+// Inviting pulse around the play button before playback starts
+@keyframes play-pulse {
+  0% {
+    box-shadow: 0 10px 30px -6px var(--accent-glow), 0 0 0 0 rgba(124, 58, 237, .45);
+  }
+
+  70% {
+    box-shadow: 0 10px 30px -6px var(--accent-glow), 0 0 0 .6em rgba(124, 58, 237, 0);
+  }
+
+  100% {
+    box-shadow: 0 10px 30px -6px var(--accent-glow), 0 0 0 0 rgba(124, 58, 237, 0);
+  }
+}
+
+// Thicker timeline with a round handle
+.video-js .vjs-progress-control .vjs-progress-holder {
+  border-radius: 999px;
+  height: .45em;
+  overflow: visible;
+}
+
+.video-js .vjs-progress-control:hover .vjs-progress-holder {
+  font-size: 1.3em;
+}
+
+.video-js .vjs-load-progress,
+.video-js .vjs-play-progress {
+  border-radius: 999px;
+}
+
+.video-js .vjs-load-progress div {
+  border-radius: 999px;
+}
+
+.video-js .vjs-play-progress::before {
+  color: var(--white);
+  filter: drop-shadow(0 0 4px var(--accent-glow));
 }
 
 .video-js .vjs-control:focus-visible {
@@ -71,7 +117,9 @@ $big-play-button-size: 2em;
 }
 
 .video-js .vjs-control-bar {
+  backdrop-filter: blur(10px);
   background-color: var(--control-bar-background-color);
+  border-top: 1px solid rgba(255, 255, 255, .06);
   display: flex;
   position: fixed;
   z-index: 1;
