@@ -55,6 +55,14 @@ const intlMessages = defineMessages({
     id: 'player.captions.failed',
     description: 'Message shown when captions could not be translated',
   },
+  downloading: {
+    id: 'player.captions.downloading',
+    description: 'Message shown while the browser downloads a translation language pack',
+  },
+  ready: {
+    id: 'player.captions.ready',
+    description: 'Message shown when translated captions start showing',
+  },
 });
 
 const buildSources = () => {
@@ -228,6 +236,14 @@ const Webcams = () => {
           label: intl.formatMessage(intlMessages.autoTranslated),
           locale: intl.locale,
           onFailed: (language) => notify({ message: intl.formatMessage(intlMessages.translateFailed, { language }) }),
+          onProgress: (language, percent) => notify({
+            duration: 15000,
+            message: intl.formatMessage(intlMessages.downloading, { language, percent }),
+          }),
+          onReady: (language) => notify({
+            duration: 2500,
+            message: intl.formatMessage(intlMessages.ready, { language }),
+          }),
           onStart: (language) => notify({ message: intl.formatMessage(intlMessages.translating, { language }) }),
         });
       });

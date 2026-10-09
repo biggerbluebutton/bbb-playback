@@ -37,8 +37,18 @@ const orderFrom = (cues, time = 0) => [
   ...cues.filter(cue => cue.end < time),
 ];
 
+// Next lines to translate: the ones on screen or coming up first, so a seek
+// moves the translation to wherever the viewer is
+const pickNext = (pending, time = 0, size = 1) => {
+  const ahead = pending.filter(item => item.cue.end >= time);
+  const source = ahead.length > 0 ? ahead : pending;
+
+  return [...source].sort((a, b) => a.cue.start - b.cue.start).slice(0, size);
+};
+
 export {
   orderFrom,
+  pickNext,
   parseVTT,
   toSeconds,
 };

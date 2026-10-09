@@ -1,7 +1,5 @@
 import { captions as config } from 'config';
 
-const BATCH = 25;
-
 const getLanguage = (code = '') => code.split(/[-_]/)[0].toLowerCase();
 
 // Chrome's on-device Translator API: free, private, no server needed
@@ -12,10 +10,16 @@ const browserProvider = {
       targetLanguage: target,
     }).then(availability => availability !== 'unavailable').catch(() => false);
   },
-  create: (source, target) => {
+  // On-device translation is fast per line, so lines are done one by one
+  batchSize: 1,
+  create: (source, target, onProgress = () => {}) => {
     return window.Translator.create({
       sourceLanguage: source,
       targetLanguage: target,
+      // Reports the language pack download, the first time a pair is used
+      monitor: (monitor) => {
+        monitor.addEventListener('downloadprogress', (event) => onProgress(event.loaded));
+      },
     }).then(translator => ({
       translate: async (texts) => {
         const result = [];
@@ -31,6 +35,7 @@ const browserProvider = {
 
 // Any LibreTranslate compatible endpoint configured by the operator
 const httpProvider = (url, key) => ({
+  batchSize: 10,
   isAvailable: () => Promise.resolve(true),
   create: (source, target) => Promise.resolve({
     translate: (texts) => {
@@ -69,18 +74,8 @@ const getProvider = () => {
   return null;
 };
 
-// Translates in batches, reporting each batch as soon as it is ready
-const translateInBatches = async (translator, items, onBatch) => {
-  for (let index = 0; index < items.length; index += BATCH) {
-    const batch = items.slice(index, index + BATCH);
-    const texts = await translator.translate(batch.map(item => item.text));
-    onBatch(batch.map((item, i) => ({ ...item, text: texts[i] })));
-  }
-};
-
 export {
   getLanguage,
   getProvider,
   httpProvider,
-  translateInBatches,
 };

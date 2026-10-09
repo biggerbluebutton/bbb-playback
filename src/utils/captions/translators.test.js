@@ -1,7 +1,6 @@
 import {
   getLanguage,
   httpProvider,
-  translateInBatches,
 } from './translators';
 
 describe('translators', () => {
@@ -45,17 +44,5 @@ describe('translators', () => {
       json: () => Promise.resolve({ translatedText: ['Hola'] }),
     }));
     await expect(translator.translate(['Hello', 'Bye'])).rejects.toThrow('mismatch');
-  });
-
-  it('translates in batches and keeps cue timings', async () => {
-    const items = Array.from({ length: 30 }, (_, i) => ({ start: i, end: i + 1, text: `t${i}` }));
-    const translator = { translate: jest.fn(texts => Promise.resolve(texts.map(t => t.toUpperCase()))) };
-    const batches = [];
-
-    await translateInBatches(translator, items, batch => batches.push(batch));
-
-    expect(translator.translate).toHaveBeenCalledTimes(2);
-    expect(batches[0]).toHaveLength(25);
-    expect(batches[1][4]).toEqual({ start: 29, end: 30, text: 'T29' });
   });
 });

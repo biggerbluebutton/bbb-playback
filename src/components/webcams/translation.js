@@ -1,12 +1,11 @@
 import { captions as config } from 'config';
 import {
-  orderFrom,
   parseVTT,
+  pickNext,
 } from 'utils/captions/vtt';
 import {
   getLanguage,
   getProvider,
-  translateInBatches,
 } from 'utils/captions/translators';
 import { buildFileURL } from 'utils/data';
 import storage from 'utils/data/storage';
@@ -37,15 +36,32 @@ const loadSourceCues = (source) => {
   }).then(parseVTT);
 };
 
-const createCue = (cue) => {
-  const Cue = window.VTTCue || (window.vttjs && window.vttjs.VTTCue);
+// video.js tracks copy cues that are not its own VTTCue type, which would
+// break replacing the text later; native tracks (Safari) need native cues
+const createCue = (track, cue) => {
+  const emulated = Array.isArray(track.cues_) && window.vttjs && window.vttjs.VTTCue;
+  const Cue = emulated ? window.vttjs.VTTCue : window.VTTCue;
 
   return new Cue(cue.start, cue.end, cue.text);
 };
 
-// Adds machine translated caption languages to the CC menu. Each language is
-// only translated once the viewer selects it, starting from the current time
-const setupCaptionTranslation = (videojsPlayer, { label, locale, onFailed, onStart }) => {
+const clearCues = (track) => {
+  if (!track.cues) return;
+
+  while (track.cues.length > 0) track.removeCue(track.cues[0]);
+};
+
+// Adds machine translated caption languages to the CC menu. A selected
+// language shows the original lines right away and swaps each one for its
+// translation as soon as it is ready, starting from where the viewer is
+const setupCaptionTranslation = (videojsPlayer, {
+  label,
+  locale,
+  onFailed,
+  onProgress,
+  onReady,
+  onStart,
+}) => {
   const sources = storage.captions || [];
   if (sources.length === 0) return;
 
@@ -65,28 +81,71 @@ const setupCaptionTranslation = (videojsPlayer, { label, locale, onFailed, onSta
     if (display && typeof display.updateDisplay === 'function') display.updateDisplay();
   };
 
+  const showSourceTrack = () => {
+    const tracks = videojsPlayer.textTracks();
+    for (let index = 0; index < tracks.length; index++) {
+      if (tracks[index].language === source.locale) {
+        tracks[index].mode = 'showing';
+        return;
+      }
+    }
+  };
+
   const translateTrack = async (track, language, name) => {
     started.add(language);
     onStart(name);
 
+    let lastPercent = -1;
+    const handleProgress = (loaded) => {
+      const percent = Math.floor((loaded || 0) * 10) * 10;
+      if (percent === lastPercent || percent >= 100) return;
+
+      lastPercent = percent;
+      onProgress(name, percent);
+    };
+
     try {
-      // Created before anything else, while the menu click still counts as
+      // Requested before anything else, while the menu click still counts as
       // a user gesture (needed when the browser downloads a language pack)
-      const translator = await provider.create(sourceLanguage, language);
+      const creating = provider.create(sourceLanguage, language, handleProgress);
+
       if (!sourceCues) sourceCues = await loadSourceCues(source);
 
-      const cues = orderFrom(sourceCues, videojsPlayer.currentTime());
-      await translateInBatches(translator, cues, (batch) => {
-        if (videojsPlayer.isDisposed()) throw new Error('disposed');
-        batch.forEach(cue => track.addCue(createCue(cue)));
-        refreshDisplay();
+      clearCues(track);
+      let pending = sourceCues.map(cue => {
+        const vttCue = createCue(track, cue);
+        track.addCue(vttCue);
+
+        return { cue, vttCue };
       });
+      refreshDisplay();
+
+      const translator = await creating;
+      // Only worth telling when the viewer waited for a download
+      if (lastPercent >= 0) onReady(name);
+      const size = provider.batchSize || 1;
+
+      while (pending.length > 0) {
+        if (videojsPlayer.isDisposed()) return;
+
+        const batch = pickNext(pending, videojsPlayer.currentTime(), size);
+        const texts = await translator.translate(batch.map(item => item.cue.text));
+        if (videojsPlayer.isDisposed()) return;
+
+        batch.forEach((item, index) => {
+          item.vttCue.text = texts[index];
+        });
+        pending = pending.filter(item => !batch.includes(item));
+        refreshDisplay();
+      }
     } catch (error) {
       if (videojsPlayer.isDisposed()) return;
 
       logger.warn('captions', 'translate', language, error);
       started.delete(language);
+      clearCues(track);
       track.mode = 'disabled';
+      showSourceTrack();
       onFailed(name);
     }
   };

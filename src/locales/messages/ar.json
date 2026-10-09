@@ -62,5 +62,7 @@
   "player.about.modal.shortcuts.or": "أو",
   "player.captions.auto": "ترجمة آلية",
   "player.captions.translating": "جارٍ ترجمة التعليقات إلى {language}…",
-  "player.captions.failed": "تعذّرت ترجمة التعليقات إلى {language}"
+  "player.captions.failed": "تعذّرت ترجمة التعليقات إلى {language}",
+  "player.captions.downloading": "جارٍ تنزيل اللغة {language} للتعليقات… {percent}%",
+  "player.captions.ready": "أصبحت التعليقات باللغة {language} جاهزة"
 }

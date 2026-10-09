@@ -1,6 +1,7 @@
 import {
   orderFrom,
   parseVTT,
+  pickNext,
   toSeconds,
 } from './vtt';
 
@@ -42,5 +43,16 @@ describe('vtt', () => {
   it('starts with the cues ahead of the current time', () => {
     const cues = [{ end: 5 }, { end: 10 }, { end: 15 }];
     expect(orderFrom(cues, 8)).toEqual([{ end: 10 }, { end: 15 }, { end: 5 }]);
+  });
+
+  it('picks the lines at or after the current time first', () => {
+    const item = (start, end) => ({ cue: { start, end } });
+    const pending = [item(0, 2), item(10, 12), item(4, 6), item(20, 22)];
+
+    expect(pickNext(pending, 5, 2)).toEqual([item(4, 6), item(10, 12)]);
+    expect(pickNext(pending, 0, 1)).toEqual([item(0, 2)]);
+    // Past the last line, whatever is left
+    expect(pickNext([item(0, 2), item(4, 6)], 30, 5)).toEqual([item(0, 2), item(4, 6)]);
+    expect(pickNext([], 3, 1)).toEqual([]);
   });
 });

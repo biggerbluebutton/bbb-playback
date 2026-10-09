@@ -62,5 +62,7 @@
   "player.about.modal.shortcuts.or": "or",
   "player.captions.auto": "auto-translated",
   "player.captions.translating": "Translating captions into {language}…",
-  "player.captions.failed": "Couldn't translate captions into {language}"
+  "player.captions.failed": "Couldn't translate captions into {language}",
+  "player.captions.downloading": "Downloading {language} for captions… {percent}%",
+  "player.captions.ready": "{language} captions are ready"
 }
