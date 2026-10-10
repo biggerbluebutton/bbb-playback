@@ -109,7 +109,8 @@ When no URL is provided, the dev server starts normally without any proxy.
 - shortcuts: alt + shift
   - `plain`: also enable single key controls [`true`|`false`]
     - `Space`/`K`: play/pause, `←`/`J`: seek backwards, `→`/`L`: seek forwards,
-      `F`: toggle fullscreen, `M`: mute
+      `F`: toggle fullscreen, `M`: mute, `<`/`>`: slower/faster, `B`: bookmark
+      the current moment, `?`: show shortcuts
   - `fullscreen`: `K`
   - `play/pause`: `Enter`
   - `section`: `L`
@@ -130,6 +131,16 @@ When no URL is provided, the dev server starts normally without any proxy.
 - thumbnails:
   - `scroll`: automatic scroll [`true`|`false`]
   - `align`: scroll align [`left`|`center`|`right`]
+
+## Viewer features
+
+- Bookmarks: viewers can bookmark moments with a note (`B` or the header
+  button). They are listed in the Bookmarks panel, marked on the timeline and
+  kept in the viewer's browser, per recording
+- Transcript: when a recording has captions, the Transcript panel shows them as
+  a searchable list that follows playback; clicking a line plays from there
+- Timeline preview: hovering the progress bar shows the slide at that moment
+- Search: live results with the matching slide text; clicking one plays it
 
 ## Standalone recordings
 

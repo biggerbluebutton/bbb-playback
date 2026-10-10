@@ -76,7 +76,24 @@ const skip = (change) => {
   }
 };
 
+// Next speed up (+1) or down (-1) among the configured rates
+const getNextRate = (rates, current, direction) => {
+  const sorted = [...rates].sort((a, b) => a - b);
+  if (sorted.length === 0) return current;
+
+  if (direction > 0) {
+    const next = sorted.find(rate => rate > current + 0.001);
+
+    return next === undefined ? sorted[sorted.length - 1] : next;
+  }
+
+  const previous = [...sorted].reverse().find(rate => rate < current - 0.001);
+
+  return previous === undefined ? sorted[0] : previous;
+};
+
 export {
+  getNextRate,
   play,
   search,
   seek,

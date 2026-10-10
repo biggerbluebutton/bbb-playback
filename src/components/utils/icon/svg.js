@@ -8,6 +8,9 @@ const PATHS = {
       <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5" />
     </>
   ),
+  bookmark: (
+    <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z" />
+  ),
   keyboard: (
     <>
       <rect x="2" y="5" width="20" height="14" rx="2" />

@@ -95,7 +95,15 @@ describe('plain shortcuts', () => {
     expect(getPlainAction(event('l'))).toBe('forward');
     expect(getPlainAction(event('f'))).toBe('fullscreen');
     expect(getPlainAction(event('m'))).toBe('mute');
+    expect(getPlainAction(event('b'))).toBe('bookmark');
     expect(getPlainAction(event('x'))).toBe(null);
+  });
+
+  it('accepts Shift for the keys that need it', () => {
+    expect(getPlainAction(event('>', document.body, { shiftKey: true }))).toBe('faster');
+    expect(getPlainAction(event('<', document.body, { shiftKey: true }))).toBe('slower');
+    expect(getPlainAction(event('?', document.body, { shiftKey: true }))).toBe('help');
+    expect(getPlainAction(event('K', document.body, { shiftKey: true }))).toBe(null);
   });
 
   it('ignores modified keys', () => {

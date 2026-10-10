@@ -26,7 +26,11 @@ import progress from 'utils/progress';
 import notify from 'utils/toast';
 import storage from 'utils/data/storage';
 import player from 'utils/player';
-import { renderSlideMarkers } from './markers';
+import {
+  renderBookmarkMarkers,
+  renderSlideMarkers,
+} from './markers';
+import { attachTimelinePreview } from './preview';
 import setupCaptionTranslation from './translation';
 import './index.scss';
 
@@ -42,6 +46,10 @@ const intlMessages = defineMessages({
   restart: {
     id: 'player.resume.restart',
     description: 'Button to start the recording from the beginning',
+  },
+  previewSlide: {
+    id: 'player.search.modal.slide',
+    description: 'Slide label in the timeline preview',
   },
   autoTranslated: {
     id: 'player.captions.auto',
@@ -230,7 +238,18 @@ const Webcams = () => {
           }
         });
 
-        player.webcams.on('loadedmetadata', () => renderSlideMarkers(player.webcams));
+        player.webcams.on('loadedmetadata', () => {
+          renderSlideMarkers(player.webcams);
+          renderBookmarkMarkers(player.webcams);
+        });
+
+        const handleBookmarks = () => renderBookmarkMarkers(player.webcams);
+        document.addEventListener(EVENTS.BOOKMARKS, handleBookmarks);
+        player.webcams.on('dispose', () => document.removeEventListener(EVENTS.BOOKMARKS, handleBookmarks));
+
+        attachTimelinePreview(player.webcams, {
+          slideLabel: (number) => intl.formatMessage(intlMessages.previewSlide, { number }),
+        });
 
         setupCaptionTranslation(player.webcams, {
           label: intl.formatMessage(intlMessages.autoTranslated),

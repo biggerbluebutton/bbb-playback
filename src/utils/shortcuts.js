@@ -99,7 +99,14 @@ const PLAIN_KEYS = {
   arrowright: 'forward',
   f: 'fullscreen',
   m: 'mute',
+  b: 'bookmark',
+  // Typed with Shift on most layouts
+  '<': 'slower',
+  '>': 'faster',
+  '?': 'help',
 };
+
+const SHIFTED_KEYS = ['<', '>', '?'];
 
 const INTERACTIVE = 'a, button, [role="button"], [role="slider"], .vjs-control-bar';
 
@@ -114,8 +121,9 @@ const isFreeTarget = (target) => {
 };
 
 const getPlainAction = (event) => {
-  if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return null;
+  if (event.altKey || event.ctrlKey || event.metaKey) return null;
   if (typeof event.key !== 'string') return null;
+  if (event.shiftKey && !SHIFTED_KEYS.includes(event.key)) return null;
   if (!isFreeTarget(event.target)) return null;
 
   return PLAIN_KEYS[event.key.toLowerCase()] || null;

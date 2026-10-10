@@ -18,14 +18,23 @@ const intlMessages = defineMessages({
     id: 'button.notes.aria',
     description: 'Aria label for the notes button',
   },
+  [ID.TRANSCRIPT]: {
+    id: 'button.transcript.aria',
+    description: 'Aria label for the transcript button',
+  },
+  [ID.BOOKMARKS]: {
+    id: 'button.bookmarks.aria',
+    description: 'Aria label for the bookmarks button',
+  },
 });
 
-const APPLICATIONS = [
-  ID.CHAT,
-  ID.NOTES,
-];
+const ICONS = {
+  [ID.BOOKMARKS]: 'bookmark',
+  [ID.TRANSCRIPT]: 'captions',
+};
 
 const Control = ({
+  applications,
   current,
   toggleApplication,
 }) => {
@@ -35,7 +44,7 @@ const Control = ({
 
   return (
     <div className="application-control">
-      {APPLICATIONS.map(application => {
+      {applications.map(application => {
         const active = current === application;
         const label = intl.formatMessage(intlMessages[application]);
 
@@ -49,7 +58,7 @@ const Control = ({
             title={label}
             type="button"
           >
-            <Icon name={application} />
+            <Icon name={ICONS[application] || application} />
           </button>
         );
       })}

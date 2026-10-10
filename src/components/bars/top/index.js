@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Status from './status';
 import Title from './title';
+import BookmarkButton from './buttons/bookmark';
 import SearchButton from './buttons/search';
 import SectionButton from './buttons/section';
 import ShareButton from './buttons/share';
@@ -44,6 +45,7 @@ const Top = ({
       </div>
       <div className="end">
         <Status />
+        <BookmarkButton />
         <ShareButton />
         <SearchButton openSearch={() => openModal(ID.SEARCH)} />
         <SwapButton toggleSwap={toggleSwap} hidePresentation={hidePresentation} />

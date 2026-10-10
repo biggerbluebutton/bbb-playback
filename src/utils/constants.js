@@ -19,6 +19,8 @@ const ERROR = {
 const EVENT_PREFIX = 'bbbplayback';
 
 const EVENTS = {
+  BOOKMARKS: `${EVENT_PREFIX}bookmarks`,
+  OPEN_PANEL: `${EVENT_PREFIX}openpanel`,
   TIME_UPDATE: `${EVENT_PREFIX}timeupdate`,
   TOAST: `${EVENT_PREFIX}toast`,
 };
@@ -26,6 +28,7 @@ const EVENTS = {
 const ID = {
   ABOUT: 'about',
   ALTERNATES: 'alternates',
+  BOOKMARKS: 'bookmarks',
   CANVASES: 'canvases',
   CAPTIONS: 'captions',
   CHAT: 'chat',
@@ -49,6 +52,7 @@ const ID = {
   STORAGE: 'storage',
   SWAP: 'swap',
   THUMBNAILS: 'thumbnails',
+  TRANSCRIPT: 'transcript',
   TLDRAW: 'tldraw',
   USERS: 'users',
   VIDEOS: 'videos',

@@ -224,3 +224,102 @@ $big-play-button-size: 2em;
     text-align: center;
   }
 }
+
+// Viewer bookmarks on the timeline
+.vjs-bookmark-markers {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.vjs-bookmark-marker {
+  background-color: var(--white);
+  border: 2px solid var(--accent-color);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--accent-glow);
+  box-sizing: border-box;
+  height: .7em;
+  margin-left: -.35em;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: .7em;
+}
+
+// Native time tooltips are replaced by the slide preview
+.video-js .vjs-progress-control .vjs-mouse-display,
+.video-js .vjs-progress-control:hover .vjs-mouse-display,
+.video-js .vjs-progress-control .vjs-play-progress .vjs-time-tooltip,
+.video-js .vjs-progress-control:hover .vjs-play-progress .vjs-time-tooltip {
+  display: none;
+}
+
+.timeline-preview {
+  background-color: rgba(13, 17, 28, .94);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: .75rem;
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, .55);
+  color: var(--white);
+  font-family: var(--font-family);
+  opacity: 0;
+  padding: .35rem;
+  pointer-events: none;
+  position: fixed;
+  transform: translateY(4px);
+  transition: opacity .12s ease, transform .12s ease;
+  width: 11rem;
+  z-index: 5;
+
+  &.visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.timeline-preview-image {
+  aspect-ratio: 16 / 9;
+  background-color: var(--white);
+  border-radius: .5rem;
+  overflow: hidden;
+
+  img {
+    display: block;
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+  }
+
+  &.screenshare {
+    background: var(--accent-gradient);
+
+    img {
+      display: none;
+    }
+  }
+
+  &.hidden {
+    display: none;
+  }
+}
+
+.timeline-preview-meta {
+  align-items: center;
+  display: flex;
+  font-size: .72rem;
+  justify-content: space-between;
+  padding: .35rem .25rem .1rem;
+}
+
+.timeline-preview-slide {
+  font-weight: var(--font-weight-semi-bold);
+  opacity: .85;
+}
+
+.timeline-preview-time {
+  background: var(--accent-gradient);
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-bold);
+  padding: .05rem .5rem;
+}

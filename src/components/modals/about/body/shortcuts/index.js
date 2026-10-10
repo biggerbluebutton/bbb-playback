@@ -25,6 +25,9 @@ const PLAIN_SHORTCUTS = [
   { label: 'seek.forward', keys: ['→', 'L'] },
   { label: 'fullscreen', keys: ['F'] },
   { label: 'mute', keys: ['M'] },
+  { label: 'speed', keys: ['<', '>'] },
+  { label: 'bookmark', keys: ['B'] },
+  { label: 'help', keys: ['?'] },
 ];
 
 const getCode = (shortcut) => {
@@ -86,6 +89,18 @@ const intlMessages = defineMessages({
   'mute': {
     id: 'player.about.modal.shortcuts.mute',
     description: 'Label for the about modal mute shortcut',
+  },
+  'speed': {
+    id: 'player.about.modal.shortcuts.speed',
+    description: 'Label for the about modal speed shortcut',
+  },
+  'bookmark': {
+    id: 'player.about.modal.shortcuts.bookmark',
+    description: 'Label for the about modal bookmark shortcut',
+  },
+  'help': {
+    id: 'player.about.modal.shortcuts.help',
+    description: 'Label for the about modal help shortcut',
   },
   quick: {
     id: 'player.about.modal.shortcuts.quick',

@@ -12,12 +12,16 @@ import Modal from './modal';
 import BottomBar from 'components/bars/bottom';
 import TopBar from 'components/bars/top';
 import Toast from 'components/toast';
+import { addBookmarkNow } from 'components/bookmarks/actions';
 import {
+  getNextRate,
   play,
   seek,
   skip,
 } from 'utils/actions';
+import { player as playerConfig } from 'config';
 import { ID } from 'utils/constants';
+import notify from 'utils/toast';
 import layout from 'utils/layout';
 import player from 'utils/player';
 import Shortcuts, { addPlainShortcuts } from 'utils/shortcuts';
@@ -28,6 +32,10 @@ const intlMessages = defineMessages({
   aria: {
     id: 'player.wrapper.aria',
     description: 'Aria label for the player wrapper',
+  },
+  speed: {
+    id: 'player.speed.changed',
+    description: 'Message shown when the playback speed changes',
   },
 });
 
@@ -73,6 +81,14 @@ const Player = () => {
 
     shortcuts.current = new Shortcuts(actions);
 
+    const changeSpeed = (direction) => {
+      if (!player.primary) return;
+
+      const rate = getNextRate(playerConfig.rates, player.primary.playbackRate(), direction);
+      player.primary.playbackRate(rate);
+      notify({ duration: 1500, message: intl.formatMessage(intlMessages.speed, { rate }) });
+    };
+
     const removePlainShortcuts = addPlainShortcuts({
       backward: actions.seek.backward,
       forward: actions.seek.forward,
@@ -81,13 +97,18 @@ const Player = () => {
         if (player.primary) player.primary.muted(!player.primary.muted());
       },
       play: actions.play,
+      bookmark: () => addBookmarkNow(intl),
+      faster: () => changeSpeed(+1),
+      slower: () => changeSpeed(-1),
+      help: () => setModal(ID.ABOUT),
     });
 
     return () => {
       if (shortcuts.current) shortcuts.current.destroy();
       removePlainShortcuts();
     };
-  }, []);
+    // Shortcuts are bound once; intl does not change while playing
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const style = {
     'fullscreen-content': fullscreen,
