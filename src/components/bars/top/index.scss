@@ -97,10 +97,24 @@
   }
 
   .chip {
+    align-items: center;
     background-color: var(--top-bar-chip-background-color);
     border-radius: 999px;
+    display: inline-flex;
     font-weight: var(--font-weight-semi-bold);
-    padding: .05rem .5rem;
+    gap: .3rem;
+    padding: .1rem .55rem .1rem .45rem;
+
+    // Icon sits at the start: right in Arabic, left in English
+    [class^="icon-"] {
+      font-size: .8rem;
+      height: auto;
+      opacity: .9;
+    }
+
+    [dir="rtl"] & {
+      padding: .1rem .45rem .1rem .55rem;
+    }
   }
 
   .interactive {
@@ -134,6 +148,15 @@
 
   .playback-duration {
     opacity: .7;
+  }
+
+  .paused {
+    display: flex;
+    font-size: .8rem;
+
+    [class^="icon-"] {
+      height: auto;
+    }
   }
 
   .equalizer {

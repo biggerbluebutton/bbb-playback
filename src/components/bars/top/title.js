@@ -9,6 +9,7 @@ import {
   controls as config,
   date,
 } from 'config';
+import Icon from 'components/utils/icon';
 import { formatTime } from 'utils/format';
 import storage from 'utils/data/storage';
 import layout from 'utils/layout';
@@ -41,25 +42,35 @@ const Title = ({ openAbout }) => {
   const { name, participants, start } = metadata;
   const duration = getDuration(metadata);
 
+  // Each detail gets an icon so date, length and audience read at a glance
   const details = [];
   if (date.enabled && start) {
-    details.push(
-      <FormattedDate
-        day="numeric"
-        key="date"
-        month="short"
-        value={new Date(start)}
-        year="numeric"
-      />
-    );
+    details.push({
+      icon: 'calendar',
+      key: 'date',
+      value: (
+        <FormattedDate
+          day="numeric"
+          month="short"
+          value={new Date(start)}
+          year="numeric"
+        />
+      ),
+    });
   }
-  if (duration) details.push(<bdi key="duration">{formatTime(duration)}</bdi>);
+  if (duration) {
+    details.push({
+      icon: 'clock',
+      key: 'duration',
+      value: <bdi>{formatTime(duration)}</bdi>,
+    });
+  }
   if (Number.isFinite(participants) && participants > 0) {
-    details.push(
-      <span key="participants">
-        {intl.formatMessage(intlMessages.participants, { count: participants })}
-      </span>
-    );
+    details.push({
+      icon: 'users',
+      key: 'participants',
+      value: intl.formatMessage(intlMessages.participants, { count: participants }),
+    });
   }
 
   const content = (
@@ -67,8 +78,11 @@ const Title = ({ openAbout }) => {
       <span className="title">{name}</span>
       {details.length > 0 ? (
         <span className="meta">
-          {details.map((detail, index) => (
-            <span className="chip" key={index}>{detail}</span>
+          {details.map(({ icon, key, value }) => (
+            <span className="chip" key={key}>
+              <Icon name={icon} />
+              <span>{value}</span>
+            </span>
           ))}
         </span>
       ) : null}

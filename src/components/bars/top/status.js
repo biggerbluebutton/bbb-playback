@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import Icon from 'components/utils/icon';
 import { EVENTS } from 'utils/constants';
 import storage from 'utils/data/storage';
 import { formatTime } from 'utils/format';
@@ -41,11 +42,17 @@ const Status = () => {
       aria-hidden="true"
       className={playing ? 'playback-status playing' : 'playback-status'}
     >
-      <span className="equalizer">
-        <span />
-        <span />
-        <span />
-      </span>
+      {playing ? (
+        <span className="equalizer">
+          <span />
+          <span />
+          <span />
+        </span>
+      ) : (
+        <span className="paused">
+          <Icon name="pause" />
+        </span>
+      )}
       <bdi className="playback-time">
         {formatTime(time)}
         {duration.current ? <span className="playback-duration"> / {formatTime(duration.current)}</span> : null}
