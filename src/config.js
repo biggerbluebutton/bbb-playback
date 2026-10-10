@@ -5,6 +5,8 @@ const captions = {
   translate: {
     enabled: true,
     key: null,
+    // Start downloading the viewer's language pack on their first click
+    preload: true,
     languages: ['ar', 'de', 'en', 'es', 'fa', 'fr', 'hi', 'id', 'it', 'ja', 'ko', 'nl', 'pt', 'ru', 'tr', 'uk', 'ur', 'zh'],
     url: null,
   },

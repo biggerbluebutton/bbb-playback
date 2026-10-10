@@ -84,6 +84,11 @@ When no URL is provided, the dev server starts normally without any proxy.
     - `url`: a LibreTranslate compatible `/translate` endpoint. When empty, the
       browser's built-in on-device translator is used where available (Chrome)
     - `key`: optional API key sent to `url`
+    - `preload`: with the browser translator, start downloading the viewer's
+      language pack on their first click [`true`|`false`]
+
+    Translations are saved in the viewer's browser (Cache API), so switching
+    back to a language or coming back to the recording is instant.
 
 - chat:
   - `scroll`: automatic scroll [`true`|`false`]

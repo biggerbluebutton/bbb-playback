@@ -6,7 +6,12 @@ import {
 import {
   getLanguage,
   getProvider,
+  getTranslator,
 } from 'utils/captions/translators';
+import {
+  readTranslation,
+  writeTranslation,
+} from 'utils/captions/cache';
 import { buildFileURL } from 'utils/data';
 import storage from 'utils/data/storage';
 import logger from 'utils/logger';
@@ -73,7 +78,21 @@ const setupCaptionTranslation = (videojsPlayer, {
   const existing = new Set(sources.map(caption => getLanguage(caption.locale)));
   const targets = getTargets(locale, existing);
   const started = new Set();
+  const recordId = storage.metadata ? storage.metadata.id : '';
+
+  // Fetched right away so it is ready when a language is picked
   let sourceCues = null;
+  const getSourceCues = () => {
+    if (!sourceCues) {
+      sourceCues = loadSourceCues(source).catch(error => {
+        sourceCues = null;
+        throw error;
+      });
+    }
+
+    return sourceCues;
+  };
+  getSourceCues().catch(() => {});
 
   // Paused players do not redraw captions until the next time update
   const refreshDisplay = () => {
@@ -93,7 +112,7 @@ const setupCaptionTranslation = (videojsPlayer, {
 
   const translateTrack = async (track, language, name) => {
     started.add(language);
-    onStart(name);
+    const cacheKey = `${recordId}|${source.locale}|${language}`;
 
     let lastPercent = -1;
     const handleProgress = (loaded) => {
@@ -105,39 +124,60 @@ const setupCaptionTranslation = (videojsPlayer, {
     };
 
     try {
-      // Requested before anything else, while the menu click still counts as
-      // a user gesture (needed when the browser downloads a language pack)
-      const creating = provider.create(sourceLanguage, language, handleProgress);
+      const [cues, cached] = await Promise.all([getSourceCues(), readTranslation(cacheKey)]);
+      const saved = cached && cached.count === cues.length && Array.isArray(cached.texts)
+        ? cached.texts
+        : [];
+      const results = cues.map((cue, index) => (typeof saved[index] === 'string' ? saved[index] : null));
 
-      if (!sourceCues) sourceCues = await loadSourceCues(source);
-
+      // Saved lines show translated at once, the rest show the original
       clearCues(track);
-      let pending = sourceCues.map(cue => {
-        const vttCue = createCue(track, cue);
+      let pending = [];
+      cues.forEach((cue, index) => {
+        const vttCue = createCue(track, { ...cue, text: results[index] ?? cue.text });
         track.addCue(vttCue);
-
-        return { cue, vttCue };
+        if (results[index] === null) pending.push({ cue, index, vttCue });
       });
       refreshDisplay();
 
-      const translator = await creating;
+      if (pending.length === 0) return;
+
+      onStart(name);
+      const translator = await getTranslator(provider, sourceLanguage, language, handleProgress);
       // Only worth telling when the viewer waited for a download
       if (lastPercent >= 0) onReady(name);
+
       const size = provider.batchSize || 1;
+      let sinceSave = 0;
+      const save = () => writeTranslation(cacheKey, { count: cues.length, texts: results });
 
-      while (pending.length > 0) {
-        if (videojsPlayer.isDisposed()) return;
+      // A few workers, each taking the lines closest to where the viewer is
+      const worker = async () => {
+        while (pending.length > 0) {
+          if (videojsPlayer.isDisposed()) return;
 
-        const batch = pickNext(pending, videojsPlayer.currentTime(), size);
-        const texts = await translator.translate(batch.map(item => item.cue.text));
-        if (videojsPlayer.isDisposed()) return;
+          const batch = pickNext(pending, videojsPlayer.currentTime(), size);
+          pending = pending.filter(item => !batch.includes(item));
 
-        batch.forEach((item, index) => {
-          item.vttCue.text = texts[index];
-        });
-        pending = pending.filter(item => !batch.includes(item));
-        refreshDisplay();
-      }
+          const texts = await translator.translate(batch.map(item => item.cue.text));
+          if (videojsPlayer.isDisposed()) return;
+
+          batch.forEach((item, index) => {
+            item.vttCue.text = texts[index];
+            results[item.index] = texts[index];
+          });
+          refreshDisplay();
+
+          sinceSave += batch.length;
+          if (sinceSave >= 40) {
+            sinceSave = 0;
+            save();
+          }
+        }
+      };
+
+      await Promise.all(Array.from({ length: provider.concurrency || 1 }, worker));
+      if (!videojsPlayer.isDisposed()) save();
     } catch (error) {
       if (videojsPlayer.isDisposed()) return;
 
@@ -148,6 +188,33 @@ const setupCaptionTranslation = (videojsPlayer, {
       showSourceTrack();
       onFailed(name);
     }
+  };
+
+  // The language pack for the viewer's own language starts downloading on
+  // their first click or key press (browsers require a gesture), so it is
+  // usually ready by the time they open the captions menu
+  const warmUp = (languages) => {
+    if (!provider.preload || config.translate.preload === false) return;
+
+    const preferred = [locale, ...(navigator.languages || [])].map(getLanguage);
+    const target = preferred.find(language => languages.includes(language));
+    if (!target) return;
+
+    const stop = () => {
+      document.removeEventListener('pointerdown', handleGesture, true);
+      document.removeEventListener('keydown', handleGesture, true);
+    };
+
+    function handleGesture() {
+      stop();
+      getTranslator(provider, sourceLanguage, target).catch(error => {
+        logger.debug('captions', 'warm up', target, error);
+      });
+    }
+
+    document.addEventListener('pointerdown', handleGesture, true);
+    document.addEventListener('keydown', handleGesture, true);
+    videojsPlayer.on('dispose', stop);
   };
 
   Promise.all(targets.map(language => {
@@ -169,6 +236,8 @@ const setupCaptionTranslation = (videojsPlayer, {
         if (track.mode === 'showing' && !started.has(language)) translateTrack(track, language, name);
       });
     });
+
+    warmUp([...tracks.values()].map(({ language }) => language));
 
     logger.debug('captions', 'translations', [...tracks.values()].map(({ language }) => language));
   });

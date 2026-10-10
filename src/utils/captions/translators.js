@@ -10,8 +10,11 @@ const browserProvider = {
       targetLanguage: target,
     }).then(availability => availability !== 'unavailable').catch(() => false);
   },
-  // On-device translation is fast per line, so lines are done one by one
+  // Language packs are worth fetching ahead of time
+  preload: true,
+  // Line by line, a few lines at a time
   batchSize: 1,
+  concurrency: 4,
   create: (source, target, onProgress = () => {}) => {
     return window.Translator.create({
       sourceLanguage: source,
@@ -35,7 +38,8 @@ const browserProvider = {
 
 // Any LibreTranslate compatible endpoint configured by the operator
 const httpProvider = (url, key) => ({
-  batchSize: 10,
+  batchSize: 16,
+  concurrency: 3,
   isAvailable: () => Promise.resolve(true),
   create: (source, target) => Promise.resolve({
     translate: (texts) => {
@@ -74,8 +78,36 @@ const getProvider = () => {
   return null;
 };
 
+// One translator per language pair, shared by everything that needs it: a
+// background warm-up and the viewer's choice reuse the same download, and
+// every caller hears about its progress
+const translators = new Map();
+
+const getTranslator = (provider, source, target, onProgress) => {
+  const key = `${source}|${target}`;
+  let entry = translators.get(key);
+
+  if (!entry) {
+    entry = { listeners: new Set(), loaded: null };
+    entry.promise = provider.create(source, target, (loaded) => {
+      entry.loaded = loaded;
+      entry.listeners.forEach(listener => listener(loaded));
+    });
+    entry.promise.catch(() => translators.delete(key));
+    translators.set(key, entry);
+  }
+
+  if (onProgress) {
+    entry.listeners.add(onProgress);
+    if (entry.loaded !== null) onProgress(entry.loaded);
+  }
+
+  return entry.promise;
+};
+
 export {
   getLanguage,
+  getTranslator,
   getProvider,
   httpProvider,
 };

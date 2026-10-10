@@ -46,3 +46,47 @@ describe('translators', () => {
     await expect(translator.translate(['Hello', 'Bye'])).rejects.toThrow('mismatch');
   });
 });
+
+describe('getTranslator', () => {
+  const { getTranslator } = jest.requireActual('./translators');
+
+  it('shares one translator per language pair and its progress', async () => {
+    let report;
+    const translator = { translate: jest.fn() };
+    const provider = {
+      create: jest.fn((source, target, onProgress) => {
+        report = onProgress;
+        return Promise.resolve(translator);
+      }),
+    };
+    const first = jest.fn();
+    const second = jest.fn();
+
+    const a = getTranslator(provider, 'en', 'fr', first);
+    report(0.5);
+    const b = getTranslator(provider, 'en', 'fr', second);
+
+    expect(provider.create).toHaveBeenCalledTimes(1);
+    // A late caller still hears where the download is
+    expect(second).toHaveBeenCalledWith(0.5);
+    report(1);
+    expect(first).toHaveBeenLastCalledWith(1);
+    expect(second).toHaveBeenLastCalledWith(1);
+    await expect(a).resolves.toBe(translator);
+    await expect(b).resolves.toBe(translator);
+
+    getTranslator(provider, 'en', 'de');
+    expect(provider.create).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries after a failure', async () => {
+    const provider = {
+      create: jest.fn()
+        .mockImplementationOnce(() => Promise.reject(new Error('no')))
+        .mockImplementationOnce(() => Promise.resolve('ok')),
+    };
+
+    await expect(getTranslator(provider, 'en', 'es')).rejects.toThrow('no');
+    await expect(getTranslator(provider, 'en', 'es')).resolves.toBe('ok');
+  });
+});
