@@ -64,5 +64,12 @@
   "player.captions.translating": "Translating captions into {language}…",
   "player.captions.failed": "Couldn't translate captions into {language}",
   "player.captions.downloading": "Downloading {language} for captions… {percent}%",
-  "player.captions.ready": "{language} captions are ready"
+  "player.captions.ready": "{language} captions are ready",
+  "player.search.modal.placeholder": "Search slide text…",
+  "player.search.modal.hint": "Type at least {min} characters to search the slides",
+  "player.search.modal.count": "{count, plural, one {# slide found} other {# slides found}}",
+  "player.search.modal.empty": "No slides match “{query}”",
+  "player.search.modal.cancel": "Cancel",
+  "player.search.modal.show": "Show in filmstrip",
+  "player.search.modal.slide": "Slide {number}"
 }

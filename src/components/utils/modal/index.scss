@@ -65,6 +65,34 @@
   }
 }
 
+// Dialogs with a title: title at the start, close button at the end
+.modal.with-title {
+  border-radius: 1.1rem;
+  box-shadow: 0 24px 64px -16px rgba(15, 23, 42, .45);
+
+  .modal-control {
+    flex-direction: row;
+    gap: $margin;
+    height: auto;
+    justify-content: space-between;
+    padding: 1.25rem 1.25rem .5rem 1.5rem;
+
+    [dir="rtl"] & {
+      padding: 1.25rem 1.5rem .5rem 1.25rem;
+    }
+  }
+
+  .modal-title {
+    align-items: center;
+    display: flex;
+    font-size: 1.2rem;
+    font-weight: var(--font-weight-bold);
+    gap: .7rem;
+    letter-spacing: -.01em;
+    margin: 0;
+  }
+}
+
 @keyframes modal-enter {
   from {
     opacity: 0;

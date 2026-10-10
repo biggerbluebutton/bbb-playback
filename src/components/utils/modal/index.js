@@ -4,6 +4,7 @@ import {
   defineMessages,
   useIntl,
 } from 'react-intl';
+import cx from 'classnames';
 import Button from 'components/utils/button';
 import './index.scss';
 
@@ -19,19 +20,25 @@ const propTypes = {
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,
   ]),
+  className: PropTypes.string,
   onClose: PropTypes.func,
+  title: PropTypes.node,
 };
 
 const defaultProps = {
   children: null,
+  className: '',
   onClose: () => {},
+  title: null,
 };
 
 const FOCUSABLE = 'input, button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 const Modal = ({
   children,
+  className,
   onClose,
+  title,
 }) => {
   const intl = useIntl();
   const modal = useRef();
@@ -72,13 +79,15 @@ const Modal = ({
       onClick={handleBackdropClick}
     >
       <div
+        aria-labelledby={title ? 'modal-title' : undefined}
         aria-modal="true"
-        className="modal"
+        className={cx('modal', className, { 'with-title': title })}
         ref={modal}
         role="dialog"
         tabIndex="-1"
       >
         <div className="modal-control">
+          {title ? <h2 className="modal-title" id="modal-title">{title}</h2> : null}
           <Button
             aria={intl.formatMessage(intlMessages.close)}
             circle

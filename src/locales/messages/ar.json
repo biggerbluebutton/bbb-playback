@@ -64,5 +64,12 @@
   "player.captions.translating": "جارٍ ترجمة التعليقات إلى {language}…",
   "player.captions.failed": "تعذّرت ترجمة التعليقات إلى {language}",
   "player.captions.downloading": "جارٍ تنزيل اللغة {language} للتعليقات… {percent}%",
-  "player.captions.ready": "أصبحت التعليقات باللغة {language} جاهزة"
+  "player.captions.ready": "أصبحت التعليقات باللغة {language} جاهزة",
+  "player.search.modal.placeholder": "ابحث في نص الشرائح…",
+  "player.search.modal.hint": "اكتب {min} أحرف على الأقل للبحث في الشرائح",
+  "player.search.modal.count": "{count, plural, zero {لم يتم العثور على شرائح} one {تم العثور على شريحة واحدة} two {تم العثور على شريحتين} few {تم العثور على # شرائح} many {تم العثور على # شريحة} other {تم العثور على # شريحة}}",
+  "player.search.modal.empty": "لا توجد شرائح تطابق «{query}»",
+  "player.search.modal.cancel": "إلغاء",
+  "player.search.modal.show": "عرض في شريط الشرائح",
+  "player.search.modal.slide": "الشريحة {number}"
 }
