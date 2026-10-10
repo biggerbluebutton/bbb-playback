@@ -69,6 +69,7 @@ const Screenshare = () => {
   return (
     <div
       aria-label={intl.formatMessage(intlMessages.aria)}
+      role="region"
       className={cx('screenshare-wrapper', { inactive: currentContent !== ID.SCREENSHARE })}
       id={ID.SCREENSHARE}
     >

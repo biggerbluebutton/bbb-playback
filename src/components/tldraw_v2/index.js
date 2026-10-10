@@ -160,6 +160,7 @@ const TldrawPresentationV2 = ({ size }) => {
   return (
     <div
       aria-label={intl.formatMessage(intlMessages.aria)}
+      role="region"
       className={cx('presentation-wrapper', { inactive: (currentContent !== ID.PRESENTATION && showScreenshare) })}
       id={ID.PRESENTATION}
     >{!started

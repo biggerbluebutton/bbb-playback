@@ -126,7 +126,7 @@ const Player = () => {
   };
 
   return (
-    <div
+    <main
       aria-label={intl.formatMessage(intlMessages.aria)}
       className={cx('player-wrapper', style)}
       id={ID.PLAYER}
@@ -160,7 +160,7 @@ const Player = () => {
         modal={modal}
       />
       <Toast />
-    </div>
+    </main>
   );
 };
 

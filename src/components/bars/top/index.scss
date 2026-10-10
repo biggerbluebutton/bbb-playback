@@ -57,6 +57,13 @@
     }
   }
 
+  .title-heading {
+    display: flex;
+    font: inherit;
+    margin: 0;
+    min-width: 0;
+  }
+
   .title-block {
     align-items: flex-start;
     background: none;
@@ -75,8 +82,10 @@
     text-align: start;
   }
 
+  // At this size and weight it counts as large text, readable on the brand
+  // gradient (WCAG AA 3:1)
   .title {
-    font-size: 1.05rem;
+    font-size: 1.2rem;
     font-weight: var(--font-weight-bold);
     letter-spacing: -.01em;
     max-width: 100%;
@@ -134,7 +143,7 @@
 
   .playback-status {
     align-items: center;
-    background-color: rgba(0, 0, 0, .18);
+    background-color: rgba(60, 0, 50, .24);
     border-radius: 999px;
     display: flex;
     font-size: .8rem;
@@ -190,7 +199,7 @@
 // Watched share of the recording: conic ring and percentage
 .top-bar .watch-progress {
   align-items: center;
-  background-color: rgba(0, 0, 0, .18);
+  background-color: rgba(60, 0, 50, .24);
   border-radius: 999px;
   display: flex;
   font-size: .75rem;

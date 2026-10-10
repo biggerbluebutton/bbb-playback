@@ -201,6 +201,7 @@ const Transcript = () => {
   return (
     <div
       aria-label={intl.formatMessage(intlMessages.aria)}
+      role="region"
       className="transcript-wrapper"
       id={ID.TRANSCRIPT}
     >

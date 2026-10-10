@@ -298,6 +298,7 @@ const Webcams = () => {
   return (
     <div
       aria-label={intl.formatMessage(intlMessages.aria)}
+      role="region"
       className="webcams-wrapper"
       id={ID.WEBCAMS}
     >

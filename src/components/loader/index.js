@@ -86,7 +86,8 @@ const Loader = () => {
   if (error) return <Error code={error} />;
 
   const loader = (
-    <div
+    <main
+      aria-busy="true"
       aria-label={intl.formatMessage(intlMessages.aria)}
       className="loader-wrapper"
       id={ID.LOADER}
@@ -98,7 +99,7 @@ const Loader = () => {
       <div className="loader-bottom">
         <Data data={storage.built} />
       </div>
-    </div>
+    </main>
   );
 
   if (loaded) {

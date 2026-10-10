@@ -35,7 +35,7 @@
   --tertiary-highlight-color: rgb(218, 225, 234);
   --tertiary-content-color: rgb(51, 65, 85);
 
-  --muted-content-color: rgb(100, 116, 139);
+  --muted-content-color: rgb(90, 101, 119);
   --border-color: rgba(15, 23, 42, .08);
   --focus-ring-color: var(--accent-color);
   --shadow-color: rgba(15, 23, 42, .16);
@@ -46,6 +46,8 @@
   --accent-gradient: linear-gradient(90deg, rgb(222, 49, 173) 0%, rgb(230, 49, 178) 25%, rgb(239, 49, 183) 50%, rgb(246, 51, 189) 75%, rgb(246, 60, 194) 100%);
   --accent-glow: rgba(252, 37, 198, .35);
   --accent-soft: rgba(252, 37, 198, .1);
+  // Brand pink deep enough for small text on light surfaces (WCAG AA 4.5:1)
+  --accent-text-color: rgb(194, 19, 145);
 
   // Soft color glows behind the slide
   --stage-background:
@@ -86,6 +88,7 @@
   --accent-color: rgb(252, 37, 198);
   --accent-glow: rgba(252, 37, 198, .42);
   --accent-soft: rgba(252, 37, 198, .14);
+  --accent-text-color: rgb(255, 106, 213);
 
   --stage-background:
     radial-gradient(60% 70% at 8% 0%, rgba(252, 37, 198, .24), transparent 60%),

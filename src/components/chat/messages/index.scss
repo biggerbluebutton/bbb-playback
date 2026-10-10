@@ -219,8 +219,14 @@
     border-radius: 50%;
   }
 
+  // Messages still to come: faded, but readable (WCAG AA)
   .inactive {
-    opacity: .5;
+    opacity: .7;
+  }
+
+  // Faded avatars would make their initials unreadable
+  .interactive.inactive {
+    opacity: 1;
   }
 
   .emphasized {

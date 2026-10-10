@@ -87,20 +87,22 @@ const Title = ({ openAbout }) => {
   const interactive = layout.control && config.about;
   if (!interactive) {
 
-    return <div className="title-block">{content}</div>;
+    return <h1 className="title-heading"><span className="title-block">{content}</span></h1>;
   }
 
   return (
-    <button
-      aria-haspopup="dialog"
-      aria-label={[name, intl.formatMessage(intlMessages.about)].filter(Boolean).join(' – ')}
-      className="title-block interactive"
-      onClick={openAbout}
-      title={name || undefined}
-      type="button"
-    >
-      {content}
-    </button>
+    <h1 className="title-heading">
+      <button
+        aria-haspopup="dialog"
+        aria-label={[name, intl.formatMessage(intlMessages.about)].filter(Boolean).join(' – ')}
+        className="title-block interactive"
+        onClick={openAbout}
+        title={name || undefined}
+        type="button"
+      >
+        {content}
+      </button>
+    </h1>
   );
 };
 

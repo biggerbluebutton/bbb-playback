@@ -85,6 +85,7 @@ const Thumbnails = ({
   return (
     <div
       aria-label={intl.formatMessage(intlMessages.aria)}
+      role="region"
       className="thumbnails-wrapper"
       id={ID.THUMBNAILS}
       onMouseEnter={() => interaction.current = true}

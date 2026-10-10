@@ -126,6 +126,7 @@ const Bookmarks = ({ focus }) => {
   return (
     <div
       aria-label={intl.formatMessage(intlMessages.aria)}
+      role="region"
       className="bookmarks-wrapper"
       id={ID.BOOKMARKS}
     >

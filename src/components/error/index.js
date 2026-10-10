@@ -76,13 +76,15 @@ const Error = ({ code }) => {
   } = getMessages(code);
 
   return (
-    <div
+    <main
       aria-label={intl.formatMessage(intlMessages.aria)}
       className="error-wrapper"
       id={ID.ERROR}
-      role="alert"
     >
-      <div className="error-content">
+      <div
+        className="error-content"
+        role="alert"
+      >
         <div className="error-code">
           {code}
         </div>
@@ -102,7 +104,7 @@ const Error = ({ code }) => {
           </button>
         ) : null}
       </div>
-    </div>
+    </main>
   );
 };
 

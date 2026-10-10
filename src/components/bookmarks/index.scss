@@ -104,7 +104,7 @@
   background-color: var(--accent-soft);
   border: none;
   border-radius: 999px;
-  color: var(--accent-color);
+  color: var(--accent-text-color);
   cursor: pointer;
   flex-shrink: 0;
   font-family: inherit;
@@ -202,7 +202,7 @@
   align-items: center;
   background-color: var(--accent-soft);
   border-radius: 50%;
-  color: var(--accent-color);
+  color: var(--accent-text-color);
   display: flex;
   font-size: 1.3rem;
   height: 3rem;

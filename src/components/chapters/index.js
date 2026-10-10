@@ -79,6 +79,7 @@ const Chapters = () => {
   return (
     <div
       aria-label={intl.formatMessage(intlMessages.aria)}
+      role="region"
       className="chapters-wrapper"
       id={ID.CHAPTERS}
     >
