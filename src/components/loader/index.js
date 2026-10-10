@@ -13,6 +13,7 @@ import {
 import Data from './data';
 import Dots from './dots';
 import Error from 'components/error';
+import ErrorBoundary from 'components/error/boundary';
 import {
   ERROR,
   ID,
@@ -104,9 +105,11 @@ const Loader = () => {
     layout.mode = getLayout();
 
     return (
-      <Suspense fallback={loader}>
-        <Player />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={loader}>
+          <Player />
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 

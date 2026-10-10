@@ -1,29 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Icon from 'components/utils/icon';
 import { EVENTS } from 'utils/constants';
-import storage from 'utils/data/storage';
+import getDuration from 'utils/duration';
 import { formatTime } from 'utils/format';
 
 // Time updates only flow while the media plays
 const IDLE = 600;
-
-const getDuration = () => {
-  const { start, end } = storage.metadata || {};
-  const duration = (end - start) / 1000;
-
-  return Number.isFinite(duration) && duration > 0 ? duration : null;
-};
 
 // Live playback position with an equalizer that moves while playing
 const Status = () => {
   const [time, setTime] = useState(0);
   const [playing, setPlaying] = useState(false);
   const idle = useRef();
-  const duration = useRef(getDuration());
+  const duration = getDuration();
 
   useEffect(() => {
     const handleTimeUpdate = (event) => {
       setTime(Math.floor(event.detail.time));
+      // A jump while paused is not playback
+      if (event.detail.seek) return;
+
       setPlaying(true);
       clearTimeout(idle.current);
       idle.current = setTimeout(() => setPlaying(false), IDLE);
@@ -55,7 +51,7 @@ const Status = () => {
       )}
       <bdi className="playback-time">
         {formatTime(time)}
-        {duration.current ? <span className="playback-duration"> / {formatTime(duration.current)}</span> : null}
+        {duration ? <span className="playback-duration"> / {formatTime(duration)}</span> : null}
       </bdi>
     </div>
   );

@@ -55,7 +55,13 @@ const readAll = () => {
 
 const isRange = (range) => Array.isArray(range) && range.length === 2 && range.every(Number.isFinite);
 
+// Allowed drift between media time and wall time, in seconds
+const TOLERANCE = 1.5;
+
+const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
 let state = {
+  lastClock: 0,
   lastSaved: 0,
   lastTime: null,
   ranges: [],
@@ -67,6 +73,7 @@ const load = (recordId) => {
   const ranges = Array.isArray(stored) ? stored.filter(isRange) : [];
 
   state = {
+    lastClock: 0,
     lastSaved: Date.now(),
     lastTime: null,
     ranges: ranges.reduce((all, [s, e]) => addRange(all, s, e), []),
@@ -93,15 +100,20 @@ const save = () => {
 };
 
 // Counts the time between two consecutive updates as watched, as long as
-// playback moved forward normally (a jump is a seek, not watching)
-const track = (time) => {
-  const { lastTime } = state;
+// playback moved forward about as much as the clock and speed allow. Slow
+// timers (background tabs) and fast speeds still count; a jump does not
+const track = (time, rate = 1) => {
+  const { lastClock, lastTime } = state;
+  const clock = now();
   state.lastTime = time;
+  state.lastClock = clock;
 
   if (lastTime === null || !state.recordId) return;
 
   const step = time - lastTime;
-  if (step <= 0 || step > 2) return;
+  const elapsed = (clock - lastClock) / 1000;
+  const expected = elapsed * Math.max(rate || 1, 0.1);
+  if (step <= 0 || step > expected + TOLERANCE) return;
 
   state.ranges = addRange(state.ranges, lastTime, time);
   document.dispatchEvent(new CustomEvent(EVENTS.WATCHED));

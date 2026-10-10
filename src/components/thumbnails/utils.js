@@ -1,4 +1,5 @@
 import { ID } from 'utils/constants';
+import storage from 'utils/data/storage';
 import { isEnabled } from 'utils/data/validators';
 
 const isLayoutEvent = item => item && Object.hasOwn(item, 'showScreenshare');
@@ -83,4 +84,16 @@ export const buildThumbnailItems = (thumbnails, layoutSwap = [], screenshare = [
     ...item,
     id: index + 1,
   }));
+};
+
+// The list the filmstrip shows, built once: search, chapters and the
+// timeline preview use it too so their numbering always matches
+let items = null;
+
+export const getThumbnailItems = () => {
+  if (!items) {
+    items = buildThumbnailItems(storage.thumbnails || [], storage.layoutSwap, storage.screenshare);
+  }
+
+  return items;
 };

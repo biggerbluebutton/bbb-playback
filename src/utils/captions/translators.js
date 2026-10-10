@@ -88,16 +88,25 @@ const getTranslator = (provider, source, target, onProgress) => {
   let entry = translators.get(key);
 
   if (!entry) {
-    entry = { listeners: new Set(), loaded: null };
-    entry.promise = provider.create(source, target, (loaded) => {
-      entry.loaded = loaded;
-      entry.listeners.forEach(listener => listener(loaded));
+    const created = { listeners: new Set(), loaded: null, settled: false };
+    created.promise = provider.create(source, target, (loaded) => {
+      created.loaded = loaded;
+      created.listeners.forEach(listener => listener(loaded));
     });
-    entry.promise.catch(() => translators.delete(key));
-    translators.set(key, entry);
+    // Progress only matters while the language pack downloads
+    created.promise.then(() => {
+      created.settled = true;
+      created.listeners.clear();
+    }, () => {
+      created.settled = true;
+      created.listeners.clear();
+      translators.delete(key);
+    });
+    translators.set(key, created);
+    entry = created;
   }
 
-  if (onProgress) {
+  if (onProgress && !entry.settled) {
     entry.listeners.add(onProgress);
     if (entry.loaded !== null) onProgress(entry.loaded);
   }

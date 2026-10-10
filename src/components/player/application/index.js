@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { getThumbnailItems } from 'components/thumbnails/utils';
 import Content from './content';
 import Control from './control';
 import { EVENTS, ID } from 'utils/constants';
@@ -11,7 +12,7 @@ const DEFAULT = ID.CHAT;
 // Transcript only when the recording has captions
 const getApplications = () => [
   ID.CHAT,
-  ...(isEmpty(storage.thumbnails) ? [] : [ID.CHAPTERS]),
+  ...(isEmpty(getThumbnailItems()) ? [] : [ID.CHAPTERS]),
   ID.NOTES,
   ...(isEmpty(storage.captions) ? [] : [ID.TRANSCRIPT]),
   ID.BOOKMARKS,

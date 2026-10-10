@@ -136,8 +136,9 @@ const buildOptions = (sources, tracks) => {
   };
 };
 
-const dispatchTimeUpdate = (time) => {
-  const event = new CustomEvent(EVENTS.TIME_UPDATE, { detail: { time } });
+// `seek` marks updates caused by jumping, not by playing
+const dispatchTimeUpdate = (time, seek = false) => {
+  const event = new CustomEvent(EVENTS.TIME_UPDATE, { detail: { seek, time } });
   document.dispatchEvent(event);
 };
 
@@ -191,7 +192,7 @@ const Webcams = () => {
             if (player.webcams && !player.webcams.isDisposed()) {
               const currentTime = player.webcams.currentTime();
               dispatchTimeUpdate(currentTime);
-              watched.track(currentTime);
+              watched.track(currentTime, player.webcams.playbackRate());
               const now = Date.now();
               if (now - lastProgressSave.current >= progress.SAVE_INTERVAL) {
                 progress.save(recordId, currentTime);
@@ -212,7 +213,7 @@ const Webcams = () => {
 
         player.webcams.on('seeked', () => {
           const currentTime = player.webcams.currentTime();
-          dispatchTimeUpdate(currentTime);
+          dispatchTimeUpdate(currentTime, player.webcams.paused());
           progress.save(recordId, currentTime);
         });
 

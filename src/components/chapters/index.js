@@ -12,7 +12,7 @@ import {
 import { buildChapters } from 'utils/chapters';
 import { ID } from 'utils/constants';
 import { buildFileURL } from 'utils/data';
-import storage from 'utils/data/storage';
+import { getThumbnailItems } from 'components/thumbnails/utils';
 import getDuration from 'utils/duration';
 import { formatTime } from 'utils/format';
 import player from 'utils/player';
@@ -69,7 +69,7 @@ const Progress = ({ ratio, label }) => {
 const Chapters = () => {
   const intl = useIntl();
   const ranges = useWatched();
-  const chapters = useMemo(() => buildChapters(storage.thumbnails, getDuration()), []);
+  const chapters = useMemo(() => buildChapters(getThumbnailItems(), getDuration()), []);
   const current = useCurrentIndex(chapters);
 
   const jump = (time) => {

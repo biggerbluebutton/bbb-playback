@@ -8,7 +8,8 @@ import Icon from 'components/utils/icon';
 import Modal from 'components/utils/modal';
 import { search as config } from 'config';
 import { search as getSearch } from 'utils/actions';
-import storage from 'utils/data/storage';
+import { getThumbnailItems } from 'components/thumbnails/utils';
+import { ID } from 'utils/constants';
 import player from 'utils/player';
 import Results from './results';
 import './index.scss';
@@ -72,11 +73,16 @@ const Search = ({
   const trimmed = query.trim();
   const valid = trimmed.length >= config.length.min;
 
-  const indexes = useMemo(() => {
-    return valid ? getSearch(trimmed, storage.thumbnails) : [];
-  }, [trimmed, valid]);
+  const items = useMemo(getThumbnailItems, []);
 
-  const results = indexes.map(index => ({ index, item: storage.thumbnails[index] }));
+  // Indexes match the filmstrip, so "Show in filmstrip" keeps the right ones
+  const indexes = useMemo(() => {
+    if (!valid) return [];
+
+    return getSearch(trimmed, items).filter(index => items[index].src !== ID.SCREENSHARE);
+  }, [items, trimmed, valid]);
+
+  const results = indexes.map(index => ({ index, item: items[index] }));
   const found = results.length > 0;
 
   const showInFilmstrip = () => {

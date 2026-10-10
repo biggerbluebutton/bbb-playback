@@ -29,24 +29,47 @@ describe('watched ranges', () => {
 });
 
 describe('watched tracking', () => {
-  beforeEach(() => localStorage.clear());
+  let clock = 0;
+  const advance = (seconds) => { clock += seconds * 1000; };
+
+  beforeEach(() => {
+    localStorage.clear();
+    clock = 0;
+    jest.spyOn(performance, 'now').mockImplementation(() => clock);
+  });
+
+  afterEach(() => jest.restoreAllMocks());
 
   it('counts normal playback, not seeks', () => {
     const listener = jest.fn();
     document.addEventListener(EVENTS.WATCHED, listener);
 
     watched.load('rec');
-    [0, 0.1, 0.2, 0.3].forEach(t => watched.track(t));
+    [0, 0.1, 0.2, 0.3].forEach(t => { watched.track(t); advance(0.1); });
     watched.track(50); // seek
+    advance(0.1);
     watched.track(50.1);
     watched.interrupt();
     watched.track(60); // after a pause
+    advance(0.1);
     watched.track(60.1);
 
     const ranges = watched.getRanges().map(([s, e]) => [s, Math.round(e * 10) / 10]);
     expect(ranges).toEqual([[0, 0.3], [50, 50.1], [60, 60.1]]);
     expect(listener).toHaveBeenCalled();
     document.removeEventListener(EVENTS.WATCHED, listener);
+  });
+
+  it('counts slow timers and fast speeds', () => {
+    watched.load('rec');
+    // Background tab at 2x: one update per second, 2 seconds apart
+    [0, 2, 4, 6].forEach(t => { watched.track(t, 2); advance(1); });
+    // Throttled even more at 1x
+    watched.track(6.5, 1);
+    advance(2.5);
+    watched.track(9, 1);
+
+    expect(watched.getRanges()).toEqual([[0, 9]]);
   });
 
   it('announces loaded progress', () => {
@@ -61,6 +84,7 @@ describe('watched tracking', () => {
   it('persists per recording', () => {
     watched.load('rec');
     watched.track(1);
+    advance(1);
     watched.track(2);
     watched.save();
 

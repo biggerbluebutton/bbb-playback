@@ -26,7 +26,7 @@ const search = (text, thumbnails) => {
   thumbnails.forEach((thumbnail, index) => {
     const { alt } = thumbnail;
 
-    if (alt.toLowerCase().indexOf(value) !== -1) {
+    if (typeof alt === 'string' && alt.toLowerCase().indexOf(value) !== -1) {
       result.push(index);
     }
   });

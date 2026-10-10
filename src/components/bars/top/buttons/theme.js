@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   defineMessages,
   useIntl,
 } from 'react-intl';
 import Button from 'components/utils/button';
 import { controls as config } from 'config';
-import { THEME } from 'utils/constants';
+import {
+  EVENTS,
+  THEME,
+} from 'utils/constants';
 import layout from 'utils/layout';
 import {
   applyTheme,
@@ -28,15 +31,21 @@ const Theme = () => {
   const intl = useIntl();
   const [theme, setTheme] = useState(getTheme);
 
+  useEffect(() => {
+    const handleTheme = (event) => setTheme(event.detail.theme);
+    document.addEventListener(EVENTS.THEME, handleTheme);
+
+    return () => document.removeEventListener(EVENTS.THEME, handleTheme);
+  }, []);
+
   if (!layout.control || !config.theme) return null;
 
   const dark = theme === THEME.DARK;
   const next = dark ? THEME.LIGHT : THEME.DARK;
 
   const toggleTheme = () => {
-    applyTheme(next);
     saveTheme(next);
-    setTheme(next);
+    applyTheme(next);
   };
 
   return (

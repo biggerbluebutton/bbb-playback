@@ -75,6 +75,12 @@ describe('getTranslator', () => {
     await expect(a).resolves.toBe(translator);
     await expect(b).resolves.toBe(translator);
 
+    // Once ready, nobody keeps listening
+    const late = jest.fn();
+    await getTranslator(provider, 'en', 'fr', late);
+    report(1);
+    expect(late).not.toHaveBeenCalled();
+
     getTranslator(provider, 'en', 'de');
     expect(provider.create).toHaveBeenCalledTimes(2);
   });

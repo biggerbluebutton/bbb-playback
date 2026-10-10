@@ -13,19 +13,14 @@ import {
   POSITIONS,
 } from 'utils/constants';
 import { handleAutoScroll } from 'utils/data/handlers';
-import storage from 'utils/data/storage';
 import {
   isEmpty,
   isEqual,
 } from 'utils/data/validators';
-import { buildThumbnailItems } from './utils';
+import getDuration from 'utils/duration';
+import { getThumbnailItems } from './utils';
 import './index.scss';
 
-const getRecordingEnd = () => {
-  const { start, end } = storage.metadata || {};
-
-  return (end - start) / 1000;
-};
 
 const intlMessages = defineMessages({
   aria: {
@@ -83,9 +78,7 @@ const Thumbnails = ({
     }
   });
 
-  const items = useMemo(() => {
-    return buildThumbnailItems(storage.thumbnails, storage.layoutSwap, storage.screenshare);
-  }, []);
+  const items = useMemo(getThumbnailItems, []);
 
   const currentIndex = useCurrentIndex(items);
 
@@ -105,7 +98,7 @@ const Thumbnails = ({
           result.push(
             <Item
               active={active}
-              end={items[index + 1] ? items[index + 1].timestamp : getRecordingEnd()}
+              end={items[index + 1] ? items[index + 1].timestamp : getDuration()}
               index={index}
               key={item.id ?? index}
               interactive={interactive}

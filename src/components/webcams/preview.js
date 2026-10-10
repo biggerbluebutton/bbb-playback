@@ -1,12 +1,12 @@
 import { getTitle } from 'utils/chapters';
 import { ID } from 'utils/constants';
 import { buildFileURL } from 'utils/data';
-import storage from 'utils/data/storage';
+import { getThumbnailItems } from 'components/thumbnails/utils';
 import { formatTime } from 'utils/format';
 
 // Last slide shown at or before a time
 const getSlideAt = (time) => {
-  const thumbnails = storage.thumbnails || [];
+  const thumbnails = getThumbnailItems();
   let found = null;
   let number = 0;
 

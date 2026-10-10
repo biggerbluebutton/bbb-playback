@@ -1,5 +1,6 @@
 import { controls } from 'config';
 import {
+  EVENTS,
   LAYOUT,
   THEME,
 } from 'utils/constants';
@@ -42,8 +43,11 @@ const getTheme = () => {
   return isTheme(theme) ? theme : THEME.LIGHT;
 };
 
+// Everything showing the theme (e.g. the toggle) hears about changes,
+// including the ones that follow the operating system
 const applyTheme = (theme) => {
   document.documentElement.dataset.theme = theme;
+  document.dispatchEvent(new CustomEvent(EVENTS.THEME, { detail: { theme } }));
 };
 
 const saveTheme = (theme) => {

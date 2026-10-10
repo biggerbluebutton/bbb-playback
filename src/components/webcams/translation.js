@@ -113,6 +113,10 @@ const setupCaptionTranslation = (videojsPlayer, {
   const translateTrack = async (track, language, name) => {
     started.add(language);
     const cacheKey = `${recordId}|${source.locale}|${language}`;
+    // Set when this run fails so every worker stops at once
+    const run = { failed: false };
+    let results = null;
+    let count = 0;
 
     let lastPercent = -1;
     const handleProgress = (loaded) => {
@@ -128,7 +132,8 @@ const setupCaptionTranslation = (videojsPlayer, {
       const saved = cached && cached.count === cues.length && Array.isArray(cached.texts)
         ? cached.texts
         : [];
-      const results = cues.map((cue, index) => (typeof saved[index] === 'string' ? saved[index] : null));
+      count = cues.length;
+      results = cues.map((cue, index) => (typeof saved[index] === 'string' ? saved[index] : null));
 
       // Saved lines show translated at once, the rest show the original
       clearCues(track);
@@ -153,14 +158,20 @@ const setupCaptionTranslation = (videojsPlayer, {
 
       // A few workers, each taking the lines closest to where the viewer is
       const worker = async () => {
-        while (pending.length > 0) {
+        while (pending.length > 0 && !run.failed) {
           if (videojsPlayer.isDisposed()) return;
 
           const batch = pickNext(pending, videojsPlayer.currentTime(), size);
           pending = pending.filter(item => !batch.includes(item));
 
-          const texts = await translator.translate(batch.map(item => item.cue.text));
-          if (videojsPlayer.isDisposed()) return;
+          let texts;
+          try {
+            texts = await translator.translate(batch.map(item => item.cue.text));
+          } catch (error) {
+            run.failed = true;
+            throw error;
+          }
+          if (videojsPlayer.isDisposed() || run.failed) return;
 
           batch.forEach((item, index) => {
             item.vttCue.text = texts[index];
@@ -179,7 +190,13 @@ const setupCaptionTranslation = (videojsPlayer, {
       await Promise.all(Array.from({ length: provider.concurrency || 1 }, worker));
       if (!videojsPlayer.isDisposed()) save();
     } catch (error) {
+      run.failed = true;
       if (videojsPlayer.isDisposed()) return;
+
+      // Lines already translated are kept for the next attempt
+      if (results && results.some(text => text !== null)) {
+        writeTranslation(cacheKey, { count, texts: results });
+      }
 
       logger.warn('captions', 'translate', language, error);
       started.delete(language);

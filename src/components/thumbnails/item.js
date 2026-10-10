@@ -53,7 +53,7 @@ const Item = ({
   }
 
   const handleOnClick = () => {
-    if (interactive) player.primary.currentTime(item.timestamp);
+    if (interactive && player.primary) player.primary.currentTime(item.timestamp);
   };
 
   return (
