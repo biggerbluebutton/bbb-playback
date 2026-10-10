@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Progress from './progress';
 import Status from './status';
 import Title from './title';
 import BookmarkButton from './buttons/bookmark';
@@ -45,6 +46,7 @@ const Top = ({
       </div>
       <div className="end">
         <Status />
+        <Progress />
         <BookmarkButton />
         <ShareButton />
         <SearchButton openSearch={() => openModal(ID.SEARCH)} />

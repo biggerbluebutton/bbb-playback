@@ -18,6 +18,10 @@ const intlMessages = defineMessages({
     id: 'button.notes.aria',
     description: 'Aria label for the notes button',
   },
+  [ID.CHAPTERS]: {
+    id: 'button.chapters.aria',
+    description: 'Aria label for the chapters button',
+  },
   [ID.TRANSCRIPT]: {
     id: 'button.transcript.aria',
     description: 'Aria label for the transcript button',
@@ -30,6 +34,7 @@ const intlMessages = defineMessages({
 
 const ICONS = {
   [ID.BOOKMARKS]: 'bookmark',
+  [ID.CHAPTERS]: 'chapters',
   [ID.TRANSCRIPT]: 'captions',
 };
 

@@ -93,5 +93,13 @@
   "player.speed.changed": "Speed {rate}×",
   "player.about.modal.shortcuts.speed": "Slower / faster",
   "player.about.modal.shortcuts.bookmark": "Bookmark this moment",
-  "player.about.modal.shortcuts.help": "Show shortcuts"
+  "player.about.modal.shortcuts.help": "Show shortcuts",
+  "button.chapters.aria": "Chapters",
+  "player.chapters.wrapper.aria": "Chapters area",
+  "player.chapters.screenshare": "Screen share",
+  "player.chapters.watched": "{percent}% watched",
+  "player.progress.watched": "{percent}% of this recording watched",
+  "player.progress.completed": "🎉 You've watched the whole recording",
+  "player.bookmarks.download": "Download bookmarks and notes",
+  "player.transcript.download": "Download transcript"
 }

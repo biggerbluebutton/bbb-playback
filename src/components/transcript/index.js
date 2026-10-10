@@ -9,6 +9,11 @@ import { parseVTT } from 'utils/captions/vtt';
 import { EVENTS, ID } from 'utils/constants';
 import { buildFileURL } from 'utils/data';
 import storage from 'utils/data/storage';
+import {
+  buildTranscriptText,
+  downloadFile,
+  toFileName,
+} from 'utils/export';
 import { formatTime } from 'utils/format';
 import logger from 'utils/logger';
 import player from 'utils/player';
@@ -38,6 +43,10 @@ const intlMessages = defineMessages({
   empty: {
     id: 'player.transcript.empty',
     description: 'Shown when no line matches the search',
+  },
+  download: {
+    id: 'player.transcript.download',
+    description: 'Button that downloads the transcript',
   },
 });
 
@@ -144,6 +153,16 @@ const Transcript = () => {
     if (player.primary) player.primary.currentTime(time);
   };
 
+  const download = () => {
+    const { name } = storage.metadata || {};
+    const language = (captions.find(caption => caption.locale === locale) || {}).locale || locale;
+
+    downloadFile(
+      toFileName(`${name || 'transcript'} (${language})`, 'txt'),
+      buildTranscriptText({ cues, title: name || '' }),
+    );
+  };
+
   let body;
   if (failed) {
     body = <p className="transcript-message">{intl.formatMessage(intlMessages.failed)}</p>;
@@ -207,6 +226,17 @@ const Transcript = () => {
               <option key={caption.locale} value={caption.locale}>{caption.localeName}</option>
             ))}
           </select>
+        ) : null}
+        {cues && cues.length > 0 ? (
+          <button
+            aria-label={intl.formatMessage(intlMessages.download)}
+            className="transcript-download"
+            onClick={download}
+            title={intl.formatMessage(intlMessages.download)}
+            type="button"
+          >
+            <Icon name="download" />
+          </button>
         ) : null}
       </div>
       {body}

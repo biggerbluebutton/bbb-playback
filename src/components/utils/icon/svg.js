@@ -11,6 +11,18 @@ const PATHS = {
   bookmark: (
     <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z" />
   ),
+  chapters: (
+    <>
+      <path d="M8 6h13M8 12h13M8 18h13" />
+      <path d="M3 6h.01M3 12h.01M3 18h.01" />
+    </>
+  ),
+  download: (
+    <>
+      <path d="M12 3v12M7 10l5 5 5-5" />
+      <path d="M5 21h14" />
+    </>
+  ),
   keyboard: (
     <>
       <rect x="2" y="5" width="20" height="14" rx="2" />

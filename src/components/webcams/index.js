@@ -24,6 +24,7 @@ import {
 } from 'utils/preferences';
 import progress from 'utils/progress';
 import notify from 'utils/toast';
+import watched from 'utils/watched';
 import storage from 'utils/data/storage';
 import player from 'utils/player';
 import {
@@ -166,6 +167,7 @@ const Webcams = () => {
 
       player.webcams = videojs(video, options, () => {
         const recordId = storage.metadata.id;
+        watched.load(recordId);
 
         const preferences = getMediaPreferences(config.rates);
         if (preferences.volume !== null) player.webcams.volume(preferences.volume);
@@ -189,6 +191,7 @@ const Webcams = () => {
             if (player.webcams && !player.webcams.isDisposed()) {
               const currentTime = player.webcams.currentTime();
               dispatchTimeUpdate(currentTime);
+              watched.track(currentTime);
               const now = Date.now();
               if (now - lastProgressSave.current >= progress.SAVE_INTERVAL) {
                 progress.save(recordId, currentTime);
@@ -198,7 +201,11 @@ const Webcams = () => {
           }, 1000 / (frequency ? frequency : config.rps));
         });
 
+        player.webcams.on('seeking', () => watched.interrupt());
+        player.webcams.on('ended', () => watched.interrupt());
+
         player.webcams.on('pause', () => {
+          watched.interrupt();
           clearInterval(interval.current);
           progress.save(recordId, player.webcams.currentTime());
         });

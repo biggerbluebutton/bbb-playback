@@ -164,6 +164,29 @@
   }
 }
 
+// Watched share of the recording: conic ring and percentage
+.top-bar .watch-progress {
+  align-items: center;
+  background-color: rgba(0, 0, 0, .18);
+  border-radius: 999px;
+  display: flex;
+  font-size: .75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-bold);
+  gap: .4rem;
+  margin-inline-end: $margin-small;
+  padding: .3rem .65rem .3rem .35rem;
+}
+
+.top-bar .watch-progress-ring {
+  background: conic-gradient(var(--white) var(--watched, 0deg), rgba(255, 255, 255, .28) 0);
+  border-radius: 50%;
+  height: 1rem;
+  mask: radial-gradient(circle, transparent 42%, #000 44%);
+  transition: background .6s ease;
+  width: 1rem;
+}
+
 @keyframes equalizer {
   0%,
   100% {
@@ -177,7 +200,8 @@
 
 // Narrow screens keep the title and drop the extras
 @media (max-width: 720px) {
-  .top-bar .playback-status {
+  .top-bar .playback-status,
+  .top-bar .watch-progress {
     display: none;
   }
 }

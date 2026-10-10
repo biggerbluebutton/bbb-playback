@@ -11,6 +11,7 @@ const DEFAULT = ID.CHAT;
 // Transcript only when the recording has captions
 const getApplications = () => [
   ID.CHAT,
+  ...(isEmpty(storage.thumbnails) ? [] : [ID.CHAPTERS]),
   ID.NOTES,
   ...(isEmpty(storage.captions) ? [] : [ID.TRANSCRIPT]),
   ID.BOOKMARKS,

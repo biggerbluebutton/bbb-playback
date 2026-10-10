@@ -66,6 +66,30 @@
   }
 }
 
+.transcript-download {
+  align-items: center;
+  background-color: var(--secondary-highlight-color);
+  border: none;
+  border-radius: .6rem;
+  color: var(--secondary-content-color);
+  cursor: pointer;
+  display: flex;
+  flex-shrink: 0;
+  font-size: 1rem;
+  justify-content: center;
+  width: 2.3rem;
+
+  &:hover {
+    background-color: var(--accent-soft);
+    color: var(--accent-color);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 1.5px var(--accent-color);
+    outline: none;
+  }
+}
+
 .transcript-lines {
   flex: 1;
   position: relative;

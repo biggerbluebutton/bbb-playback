@@ -5,6 +5,11 @@ import {
 } from 'react-intl';
 import Icon from 'components/utils/icon';
 import bookmarks from 'utils/bookmarks';
+import {
+  buildBookmarksMarkdown,
+  downloadFile,
+  toFileName,
+} from 'utils/export';
 import { EVENTS, ID } from 'utils/constants';
 import storage from 'utils/data/storage';
 import { formatTime } from 'utils/format';
@@ -40,6 +45,14 @@ const intlMessages = defineMessages({
   emptyText: {
     id: 'player.bookmarks.empty.text',
     description: 'Text shown when there are no bookmarks',
+  },
+  download: {
+    id: 'player.bookmarks.download',
+    description: 'Button that downloads the bookmarks and notes',
+  },
+  heading: {
+    id: 'button.bookmarks.aria',
+    description: 'Heading of the downloaded bookmarks',
   },
 });
 
@@ -95,6 +108,21 @@ const Bookmarks = ({ focus }) => {
     if (player.primary) player.primary.currentTime(time);
   };
 
+  const download = () => {
+    const { name, start } = storage.metadata || {};
+    const href = window.location.href.split('#')[0];
+    const url = new URL(href);
+    url.searchParams.delete('t');
+
+    downloadFile(toFileName(name, 'md'), buildBookmarksMarkdown({
+      date: start ? intl.formatDate(new Date(start), { dateStyle: 'long' }) : null,
+      heading: intl.formatMessage(intlMessages.heading),
+      href: url.toString(),
+      items,
+      title: name || '',
+    }), 'text/markdown');
+  };
+
   return (
     <div
       aria-label={intl.formatMessage(intlMessages.aria)}
@@ -111,6 +139,17 @@ const Bookmarks = ({ focus }) => {
           {intl.formatMessage(intlMessages.add)}
           <kbd>B</kbd>
         </button>
+        {items.length > 0 ? (
+          <button
+            aria-label={intl.formatMessage(intlMessages.download)}
+            className="bookmarks-download"
+            onClick={download}
+            title={intl.formatMessage(intlMessages.download)}
+            type="button"
+          >
+            <Icon name="download" />
+          </button>
+        ) : null}
       </div>
       {items.length > 0 ? (
         <ul className="bookmarks-list">

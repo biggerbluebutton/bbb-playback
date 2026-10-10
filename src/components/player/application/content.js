@@ -1,5 +1,6 @@
 import React from 'react';
 import Bookmarks from 'components/bookmarks';
+import Chapters from 'components/chapters';
 import Chat from 'components/chat';
 import Notes from 'components/notes';
 import Transcript from 'components/transcript';
@@ -10,6 +11,9 @@ const Content = ({ current, focus }) => {
     case ID.CHAT:
 
       return <Chat />;
+    case ID.CHAPTERS:
+
+      return <Chapters />;
     case ID.NOTES:
 
       return <Notes />;

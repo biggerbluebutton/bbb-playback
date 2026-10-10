@@ -9,7 +9,33 @@
 }
 
 .bookmarks-header {
+  display: flex;
+  gap: .4rem;
   padding: $padding-small $padding-small 0;
+}
+
+.bookmarks-download {
+  align-items: center;
+  background-color: var(--secondary-highlight-color);
+  border: none;
+  border-radius: .6rem;
+  color: var(--secondary-content-color);
+  cursor: pointer;
+  display: flex;
+  flex-shrink: 0;
+  font-size: 1rem;
+  justify-content: center;
+  width: 2.5rem;
+
+  &:hover {
+    background-color: var(--accent-soft);
+    color: var(--accent-color);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 1.5px var(--accent-color);
+    outline: none;
+  }
 }
 
 .bookmarks-add {
@@ -26,8 +52,8 @@
   font-weight: var(--font-weight-semi-bold);
   gap: .5rem;
   justify-content: center;
+  flex: 1;
   padding: .55rem .75rem;
-  width: 100%;
 
   &:hover {
     filter: brightness(1.06);

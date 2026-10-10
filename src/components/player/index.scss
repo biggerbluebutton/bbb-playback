@@ -85,3 +85,56 @@ $player-wrapper-padding: $control-bar-height;
     }
   }
 }
+
+// Double-tap seek ripple (touch screens)
+.tap-seek {
+  align-items: center;
+  animation: tap-seek .65s ease-out forwards;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, .28), rgba(255, 255, 255, .08) 70%);
+  border-radius: 50%;
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  font-size: .85rem;
+  font-weight: var(--font-weight-bold);
+  gap: .2rem;
+  height: 7rem;
+  justify-content: center;
+  pointer-events: none;
+  position: absolute;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .6);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 7rem;
+  z-index: 3;
+}
+
+.tap-seek-back {
+  left: 6%;
+}
+
+.tap-seek-forward {
+  right: 6%;
+}
+
+.tap-seek-arrows {
+  font-size: .75rem;
+  letter-spacing: -.1em;
+}
+
+@keyframes tap-seek {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scale(.7);
+  }
+
+  25% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) scale(1.1);
+  }
+}

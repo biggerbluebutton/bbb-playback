@@ -12,6 +12,7 @@ import Modal from './modal';
 import BottomBar from 'components/bars/bottom';
 import TopBar from 'components/bars/top';
 import Toast from 'components/toast';
+import useDoubleTapSeek from './gestures';
 import { addBookmarkNow } from 'components/bookmarks/actions';
 import {
   getNextRate,
@@ -39,6 +40,12 @@ const intlMessages = defineMessages({
   },
 });
 
+const TAP_SEEK = {
+  backward: () => seek(-config.seek.seconds),
+  forward: () => seek(+config.seek.seconds),
+  seconds: config.seek.seconds,
+};
+
 const Player = () => {
   const intl = useIntl();
 
@@ -49,6 +56,8 @@ const Player = () => {
   const [swap, setSwap] = useState(layout.swap);
 
   const shortcuts = useRef();
+
+  useDoubleTapSeek(TAP_SEEK);
 
   const { showPresentation } = useLayoutSwap();
   const hidePresentation = showPresentation === false;

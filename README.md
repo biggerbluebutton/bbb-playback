@@ -141,6 +141,13 @@ When no URL is provided, the dev server starts normally without any proxy.
   a searchable list that follows playback; clicking a line plays from there
 - Timeline preview: hovering the progress bar shows the slide at that moment
 - Search: live results with the matching slide text; clicking one plays it
+- Chapters: one per slide, titled from the slide text, with how much of each
+  one the viewer has watched
+- Watch progress: the header shows the share of the recording watched across
+  visits (kept in the viewer's browser), with a message once it is complete
+- Downloads: bookmarks and notes as Markdown with links to each moment, and
+  the transcript as text
+- Touch: double-tap the left or right side of the slide or video to seek
 
 ## Standalone recordings
 

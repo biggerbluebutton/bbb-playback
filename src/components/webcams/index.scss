@@ -15,6 +15,7 @@ $big-play-button-size: 2em;
 .webcams-wrapper {
   display: flex;
   height: 100%;
+  position: relative;
   width: 100%;
 }
 
@@ -299,6 +300,22 @@ $big-play-button-size: 2em;
   }
 
   &.hidden {
+    display: none;
+  }
+}
+
+.timeline-preview-title {
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  font-size: .75rem;
+  font-weight: var(--font-weight-semi-bold);
+  line-height: 1.35;
+  overflow: hidden;
+  padding: .4rem .25rem 0;
+  unicode-bidi: plaintext;
+
+  &:empty {
     display: none;
   }
 }

@@ -93,5 +93,13 @@
   "player.speed.changed": "السرعة {rate}×",
   "player.about.modal.shortcuts.speed": "أبطأ / أسرع",
   "player.about.modal.shortcuts.bookmark": "حفظ هذه اللحظة",
-  "player.about.modal.shortcuts.help": "عرض الاختصارات"
+  "player.about.modal.shortcuts.help": "عرض الاختصارات",
+  "button.chapters.aria": "الفصول",
+  "player.chapters.wrapper.aria": "منطقة الفصول",
+  "player.chapters.screenshare": "مشاركة الشاشة",
+  "player.chapters.watched": "تمت مشاهدة {percent}%",
+  "player.progress.watched": "تمت مشاهدة {percent}% من هذا التسجيل",
+  "player.progress.completed": "🎉 لقد شاهدت التسجيل بالكامل",
+  "player.bookmarks.download": "تنزيل الإشارات المرجعية والملاحظات",
+  "player.transcript.download": "تنزيل النص المكتوب"
 }

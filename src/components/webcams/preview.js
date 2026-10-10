@@ -1,3 +1,4 @@
+import { getTitle } from 'utils/chapters';
 import { ID } from 'utils/constants';
 import { buildFileURL } from 'utils/data';
 import storage from 'utils/data/storage';
@@ -30,6 +31,7 @@ const attachTimelinePreview = (videojsPlayer, { slideLabel }) => {
   preview.setAttribute('aria-hidden', 'true');
   preview.innerHTML = `
     <div class="timeline-preview-image"><img alt="" decoding="async" /></div>
+    <div class="timeline-preview-title" dir="auto"></div>
     <div class="timeline-preview-meta">
       <span class="timeline-preview-slide"></span>
       <span class="timeline-preview-time"></span>
@@ -40,6 +42,7 @@ const attachTimelinePreview = (videojsPlayer, { slideLabel }) => {
   const imageBox = preview.querySelector('.timeline-preview-image');
   const slide = preview.querySelector('.timeline-preview-slide');
   const label = preview.querySelector('.timeline-preview-time');
+  const title = preview.querySelector('.timeline-preview-title');
   let frame = null;
   let currentSrc = null;
 
@@ -55,6 +58,7 @@ const attachTimelinePreview = (videojsPlayer, { slideLabel }) => {
 
     label.textContent = formatTime(time);
     slide.textContent = found ? slideLabel(found.number) : '';
+    title.textContent = found ? getTitle(found.item.alt) || '' : '';
 
     const src = found && found.item.src !== ID.SCREENSHARE ? buildFileURL(found.item.src) : null;
     imageBox.classList.toggle('screenshare', Boolean(found) && !src);

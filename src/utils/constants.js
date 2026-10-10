@@ -23,6 +23,7 @@ const EVENTS = {
   OPEN_PANEL: `${EVENT_PREFIX}openpanel`,
   TIME_UPDATE: `${EVENT_PREFIX}timeupdate`,
   TOAST: `${EVENT_PREFIX}toast`,
+  WATCHED: `${EVENT_PREFIX}watched`,
 };
 
 const ID = {
@@ -31,6 +32,7 @@ const ID = {
   BOOKMARKS: 'bookmarks',
   CANVASES: 'canvases',
   CAPTIONS: 'captions',
+  CHAPTERS: 'chapters',
   CHAT: 'chat',
   CURSOR: 'cursor',
   DESKSHARE: 'deskshare',
