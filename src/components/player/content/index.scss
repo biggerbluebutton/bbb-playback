@@ -20,6 +20,9 @@ $stage-radius: .9rem;
   flex-direction: column;
   grid-area: content;
   height: 100%;
+  // Collapsed on phones: nothing inside may widen the page
+  min-width: 0;
+  overflow: hidden;
   width: 100%;
 
   .top-content {

@@ -48,3 +48,21 @@ describe('storage', () => {
     expect(onError).not.toHaveBeenCalled();
   });
 });
+
+describe('storage without a presentation', () => {
+  it('reports empty slides instead of failing', () => {
+    // Nothing fetched: no shapes, as with audio only recordings
+    expect(storage.slides).toEqual([]);
+    expect(storage.canvases).toEqual([]);
+    expect(storage.thumbnails).toEqual([]);
+  });
+});
+
+describe('storage lists', () => {
+  it('are empty when the recording has no such file', () => {
+    ['captions', 'chat', 'polls', 'videos', 'screenshare', 'layoutSwap', 'tldraw'].forEach(name => {
+      expect(Array.isArray(storage[name])).toBe(true);
+    });
+    expect(storage.messages).toEqual([]);
+  });
+});

@@ -191,17 +191,18 @@ const storage = {
   get alternates() {
     return DATA[ID.ALTERNATES];
   },
+  // Lists are empty, never null, when a recording lacks the file
   get captions() {
-    return DATA[ID.CAPTIONS];
+    return DATA[ID.CAPTIONS] || [];
   },
   get chat() {
-    return DATA[ID.CHAT];
+    return DATA[ID.CHAT] || [];
   },
   get polls() {
-    return DATA[ID.POLLS];
+    return DATA[ID.POLLS] || [];
   },
   get videos() {
-    return DATA[ID.VIDEOS];
+    return DATA[ID.VIDEOS] || [];
   },
   get cursor() {
     const result = DATA[ID.CURSOR];
@@ -232,29 +233,31 @@ const storage = {
     return result ? result.data : [];
   },
   get screenshare() {
-    return DATA[ID.SCREENSHARE];
+    return DATA[ID.SCREENSHARE] || [];
   },
   get shapes() {
     return DATA[ID.SHAPES];
   },
+  // Recordings without a presentation (e.g. audio only) have no shapes
   get slides() {
-    return this.shapes[ID.SLIDES];
+    return (this.shapes && this.shapes[ID.SLIDES]) || [];
   },
   get canvases() {
-    return this.shapes[ID.CANVASES];
+    return (this.shapes && this.shapes[ID.CANVASES]) || [];
   },
   get thumbnails() {
     if (!hasProperty(DATA, ID.THUMBNAILS)) {
-      DATA[ID.THUMBNAILS] = addAlternatesToThumbnails(this.shapes[ID.THUMBNAILS], this.alternates);
+      const thumbnails = (this.shapes && this.shapes[ID.THUMBNAILS]) || [];
+      DATA[ID.THUMBNAILS] = addAlternatesToThumbnails(thumbnails, this.alternates || []);
     }
 
     return DATA[ID.THUMBNAILS];
   },
   get layoutSwap() {
-    return DATA[ID.LAYOUT];
+    return DATA[ID.LAYOUT] || [];
   },
   get tldraw() {
-    return DATA[ID.TLDRAW];
+    return DATA[ID.TLDRAW] || [];
   },
 };
 
