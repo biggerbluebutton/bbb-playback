@@ -9,10 +9,6 @@ $stage-radius: .9rem;
   --top-content-color: var(--primary-content-color);
 
   --top-content-background: var(--stage-background);
-
-  --bottom-content-active-background-color: var(--accent-soft);
-  --bottom-content-background-color: var(--secondary-background-color);
-  --bottom-content-color: var(--tertiary-content-color);
 }
 
 .content {
@@ -33,35 +29,6 @@ $stage-radius: .9rem;
     height: 100%;
     position: relative;
     width: 100%;
-  }
-
-  .bottom-content {
-    background-color: var(--bottom-content-background-color);
-    border-top: 1px solid var(--border-color);
-    box-shadow: 0 -8px 24px -18px var(--shadow-color);
-    color: var(--bottom-content-color);
-    display: flex;
-    min-height: $bottom-content-height;
-    position: relative;
-    width: 100%;
-
-    .active {
-      background-color: var(--bottom-content-active-background-color);
-    }
-
-    .interactive {
-      cursor: pointer;
-      outline: none;
-
-      &:hover {
-        background-color: var(--bottom-content-active-background-color);
-      }
-
-      &:focus-visible {
-        background-color: var(--bottom-content-active-background-color);
-        box-shadow: inset 0 0 0 $focus-ring-width var(--focus-ring-color);
-      }
-    }
   }
 
   .inactive {
@@ -91,6 +58,10 @@ $stage-radius: .9rem;
   .video-js {
     background-color: var(--top-content-background-color);
   }
+}
+
+.hidden-content {
+  display: none;
 }
 
 .swapped-content {

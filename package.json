@@ -1,6 +1,6 @@
 {
   "name": "bbb-playback",
-  "version": "5.4.7",
+  "version": "5.4.8",
   "homepage": "/playback/presentation/2.3",
   "dependencies": {
     "@bigbluebutton/tldraw": "^2.0.0-alpha.36",
@@ -80,6 +80,10 @@
     "url": "https://github.com/bigbluebutton/bbb-playback/issues"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
+  },
+  "allowScripts": {
+    "core-js": false,
+    "core-js-pure": false
   }
 }

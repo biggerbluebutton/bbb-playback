@@ -22,6 +22,7 @@ import {
 } from 'utils/actions';
 import { player as playerConfig } from 'config';
 import { ID } from 'utils/constants';
+import { isEmpty } from 'utils/data/validators';
 import notify from 'utils/toast';
 import layout from 'utils/layout';
 import player from 'utils/player';
@@ -55,6 +56,7 @@ const Player = () => {
   const [modal, setModal] = useState('');
   const [search, setSearch] = useState([]);
   const [section, setSection] = useState(layout.section);
+  const [slides, setSlides] = useState(false);
   const [swap, setSwap] = useState(layout.swap);
 
   const shortcuts = useRef();
@@ -71,6 +73,11 @@ const Player = () => {
       setSwap(false);
     }
   }, [showPresentation]);
+
+  // Search results show in the slides, so open them while minimized
+  useEffect(() => {
+    if (hidePresentation && !isEmpty(search)) setSlides(true);
+  }, [hidePresentation, search]);
 
   useEffect(() => {
     const { seconds } = config.seek;
@@ -142,8 +149,12 @@ const Player = () => {
       />
       <Media
         fullscreen={fullscreen}
+        handleSearch={(value) => setSearch(value)}
+        search={search}
+        slides={slides}
         swap={swap}
         toggleFullscreen={() => setFullscreen(prevFullscreen => !prevFullscreen)}
+        toggleSlides={() => setSlides(prevSlides => !prevSlides)}
         hidePresentation={hidePresentation}
       />
       <Application />
