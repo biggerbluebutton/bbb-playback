@@ -10,7 +10,7 @@ import Canvas from './canvas';
 import {
   useCurrentContent,
   useCurrentIndex,
-  useShouldShowScreenShare,
+  useLayoutSwap,
 } from 'components/utils/hooks';
 import { ID } from 'utils/constants';
 import storage from 'utils/data/storage';
@@ -33,6 +33,10 @@ const buildViewBoxAttr = (viewBox) => {
 
   return `${x} ${y} ${width} ${height}`;
 };
+
+// Rounded slide corners, proportional to the visible area so they look the
+// same at any zoom level
+const getCornerRadius = ({ width, height }) => Math.min(width, height) * 0.02;
 
 const getViewBox = (index) => {
   const inactive = {
@@ -61,11 +65,12 @@ const Presentation = () => {
   const viewBox = getViewBox(currentPanzoomIndex);
 
   const started = currentPanzoomIndex !== -1;
-  const shouldShowScreenshare = useShouldShowScreenShare();
+  const { showScreenshare } = useLayoutSwap();
   return (
     <div
       aria-label={intl.formatMessage(intlMessages.aria)}
-      className={cx('presentation-wrapper', { inactive: (currentContent !== ID.PRESENTATION && shouldShowScreenshare) })}
+      role="region"
+      className={cx('presentation-wrapper', { inactive: (currentContent !== ID.PRESENTATION && showScreenshare) })}
       id={ID.PRESENTATION}
     >
       <div className={cx('presentation', { logo: !started })}>
@@ -78,6 +83,7 @@ const Presentation = () => {
             <clipPath id="viewBox">
               <rect
                 height={viewBox.height}
+                rx={getCornerRadius(viewBox)}
                 x={viewBox.x}
                 width={viewBox.width}
                 y={viewBox.y}

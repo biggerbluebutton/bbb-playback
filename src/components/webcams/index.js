@@ -3,8 +3,9 @@ import {
   defineMessages,
   useIntl,
 } from 'react-intl';
-import videojs from 'video.js/core.es.js';
-import { player as config } from 'config';
+import videojs from 'video.js/dist/video.es.js';
+import 'videojs-seek-buttons'
+import { player as config, shortcuts } from 'config';
 import {
   EVENTS,
   ID,
@@ -15,262 +16,386 @@ import {
   getFrequency,
   getTime,
 } from 'utils/params';
+import { formatTime } from 'utils/format';
+import { loadVideojsLanguage } from 'utils/videojsLanguage';
+import { playFirstWorking } from 'utils/media/fallback';
+import {
+  getMediaPreferences,
+  saveMediaPreferences,
+} from 'utils/preferences';
+import progress from 'utils/progress';
+import notify, { dismiss } from 'utils/toast';
+import watched from 'utils/watched';
 import storage from 'utils/data/storage';
 import player from 'utils/player';
+import {
+  renderBookmarkMarkers,
+  renderSlideMarkers,
+} from './markers';
+import { attachTimelinePreview } from './preview';
+import setupCaptions from './captions';
 import './index.scss';
 
 const intlMessages = defineMessages({
-    aria: {
-        id: 'player.webcams.wrapper.aria',
-        description: 'Aria label for the webcams wrapper',
-    },
+  captionSettings: {
+    id: 'player.captions.settings',
+    description: 'Title of the caption settings dialog',
+  },
+  unsupported: {
+    id: 'player.media.unsupported',
+    description: 'Message shown when no format of the recording plays in this browser',
+  },
+  aria: {
+    id: 'player.webcams.wrapper.aria',
+    description: 'Aria label for the webcams wrapper',
+  },
+  resumed: {
+    id: 'player.resume.message',
+    description: 'Message shown when playback resumes where the viewer left off',
+  },
+  restart: {
+    id: 'player.resume.restart',
+    description: 'Button to start the recording from the beginning',
+  },
+  previewSlide: {
+    id: 'player.search.modal.slide',
+    description: 'Slide label in the timeline preview',
+  },
+  autoTranslated: {
+    id: 'player.captions.auto',
+    description: 'Suffix for machine translated caption languages',
+  },
+  translating: {
+    id: 'player.captions.translating',
+    description: 'Message shown while captions are being translated',
+  },
+  translateFailed: {
+    id: 'player.captions.failed',
+    description: 'Message shown when captions could not be translated',
+  },
+  downloading: {
+    id: 'player.captions.downloading',
+    description: 'Message shown while the browser downloads a translation language pack',
+  },
+  preparing: {
+    id: 'player.captions.preparing',
+    description: 'Message shown while a downloaded translation model gets ready',
+  },
+  ready: {
+    id: 'player.captions.ready',
+    description: 'Message shown when translated captions start showing',
+  },
+  wait: {
+    id: 'player.captions.wait',
+    description: 'Tooltip on caption languages that wait while another one gets ready',
+  },
 });
 
 const buildSources = () => {
-    if (storage.fallback) {
-        return [{ src: buildFileURL('audio/audio.webm'), type: 'audio/webm' }];
-    }
+  if (storage.fallback) {
     return [
-        { src: buildFileURL('video/webcams.mp4'),  type: 'video/mp4'  },
-        { src: buildFileURL('video/webcams.webm'), type: 'video/webm' },
-    ].filter(source => storage.media.find(m => source.type.includes(m)));
+      {
+        src: buildFileURL('audio/audio.webm'),
+        type: 'audio/webm',
+      },
+    ];
+  }
+
+  return [
+    {
+      src: buildFileURL('video/webcams.mp4'),
+      type: 'video/mp4',
+    }, {
+      src: buildFileURL('video/webcams.webm'),
+      type: 'video/webm',
+    },
+  ].filter(source => storage.media.find(m => source.type.includes(m)));
 };
 
-const buildOptions = () => ({
-    autoplay: true,
+const buildTracks = () => {
+  return storage.captions.map(lang => {
+    const {
+      locale,
+      localeName,
+    } = lang;
+
+    return {
+      kind: 'captions',
+      src: buildFileURL(`caption_${locale}.vtt`),
+      srclang: locale,
+      label: localeName,
+    };
+  });
+};
+
+const buildOptions = (sources, tracks) => {
+  return {
     controlBar: {
-        fullscreenToggle: false,
-        pictureInPictureToggle: false,
-        volumePanel: { inline: false, vertical: true },
+      fullscreenToggle: false,
+      pictureInPictureToggle: !storage.fallback && document.pictureInPictureEnabled === true,
+      volumePanel: {
+        inline: false,
+        vertical: true,
+      },
     },
     controls: true,
     fill: true,
+    html5: {
+      // Safari's native text tracks ignore the `tracks` option (no CC
+      // button) and skip the player's caption styling, so video.js renders
+      // captions itself in every browser
+      nativeTextTracks: false,
+    },
     inactivityTimeout: 0,
     playbackRates: config.rates,
-    html5: { nativeTextTracks: true }, // let browser parse VTT; we'll render externally
-});
+    tracks: tracks.current,
+    plugins: {
+      seekButtons: {
+        forward: shortcuts.seek.seconds,
+        back: shortcuts.seek.seconds,
+      }
+    }
+  };
+};
 
-const dispatchTimeUpdate = (time) => {
-    const event = new CustomEvent(EVENTS.TIME_UPDATE, { detail: { time }});
-    document.dispatchEvent(event);
-}
+// A click or tap outside the caption settings dialog closes it, like the
+// player's other dialogs. That click does nothing else: it does not reach
+// the slides (which would play or pause) or the controls underneath
+const closeOnClickOutside = (videojsPlayer, dialog) => {
+  let closing = false;
 
-/** External subtitles: render active cue into container; handle lang switch & Off. */
-function bindExternalSubs(playerInstance, containerEl) {
-    if (!playerInstance || !containerEl) return () => {};
+  const handleDown = (event) => {
+    closing = false;
+    if (!dialog.opened() || dialog.el().contains(event.target)) return;
 
-    let currentTrack = null;
-    let currentLang = null;
-    let pollTimer = null;
+    closing = true;
+    event.stopPropagation();
+    dialog.close();
+  };
 
-    const clear = () => { containerEl.innerHTML = ''; };
+  // The rest of the same click
+  const swallow = (event) => {
+    if (!closing) return;
 
-    const attach = (track) => {
-        if (!track) return;
-        const onCueChange = () => {
-            const cues = track.activeCues;
-            if (cues && cues.length) {
-                const html = cues[0].text.replace(/\n/g, '<br>');
-                containerEl.innerHTML = `<span>${html}</span>`;
-            } else {
-                clear();
-            }
-        };
-        track.addEventListener('cuechange', onCueChange);
-        track._off = () => track.removeEventListener('cuechange', onCueChange);
-        // fire once in case cue already active
-        onCueChange();
-    };
+    event.stopPropagation();
+    if (event.type === 'click') {
+      event.preventDefault();
+      closing = false;
+    }
+  };
 
-    const detach = () => {
-        if (currentTrack && currentTrack._off) currentTrack._off();
-        currentTrack = null;
-        currentLang = null;
-        clear();
-    };
+  // Window capture runs before the page's own document listeners
+  window.addEventListener('pointerdown', handleDown, true);
+  window.addEventListener('pointerup', swallow, true);
+  window.addEventListener('click', swallow, true);
+  videojsPlayer.on('dispose', () => {
+    window.removeEventListener('pointerdown', handleDown, true);
+    window.removeEventListener('pointerup', swallow, true);
+    window.removeEventListener('click', swallow, true);
+  });
+};
 
-    const getActiveTrack = () => {
-        const list = playerInstance.textTracks();
-        if (!list) return null;
-        // 'Off' means no track with mode === 'showing'
-        for (let i = 0; i < list.length; i++) {
-            const t = list[i];
-            if (t && (t.kind === 'subtitles' || t.kind === 'captions') && t.mode === 'showing') {
-                return t;
-            }
-        }
-        return null;
-    };
-
-    const rebindIfChanged = () => {
-        const active = getActiveTrack();
-        if (!active) {
-            if (currentTrack) detach(); // turned Off
-            return;
-        }
-        const lang = (active.language || '').toLowerCase();
-        if (currentTrack !== active || currentLang !== lang) {
-            // switch
-            detach();
-            currentTrack = active;
-            currentLang = lang;
-            currentTrack.mode = 'showing';
-            attach(currentTrack);
-        }
-    };
-
-    // Initial bind
-    rebindIfChanged();
-
-    // Listen to Video.js track toggles
-    const onChange = () => {
-        // Wait to end of frame so mode flags are final
-        (window.requestAnimationFrame || setTimeout)(rebindIfChanged, 0);
-    };
-    playerInstance.on('texttrackchange', onChange);
-
-    // Some browsers are quirky; add a light poll as a safety net
-    pollTimer = setInterval(rebindIfChanged, 250);
-
-    return () => {
-        playerInstance.off('texttrackchange', onChange);
-        if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-        detach();
-    };
-}
+// `seek` marks updates caused by jumping, not by playing
+const dispatchTimeUpdate = (time, seek = false) => {
+  const event = new CustomEvent(EVENTS.TIME_UPDATE, { detail: { seek, time } });
+  document.dispatchEvent(event);
+};
 
 const Webcams = () => {
-    const intl = useIntl();
+  const intl = useIntl();
+  const sources = useRef(buildSources());
+  const tracks = useRef(buildTracks());
+  const element = useRef();
+  const interval = useRef();
+  const lastProgressSave = useRef(0);
 
-    const sources        = useRef(buildSources());
-    const tracks         = useRef(storage.captions || []); // [{ localeName, locale, default }]
-    const element        = useRef(null);
-    const interval       = useRef(null);
-    const textTracks     = useRef(null);
-    const trackHandler   = useRef(null);
-    const screenSubsRef  = useRef(null);
+  useEffect(() => {
+    let cancelled = false;
 
-    useEffect(() => {
-        if (player.webcams) return;
+    // Controls are labelled when created, so the translation comes first
+    loadVideojsLanguage(intl.locale).then((language) => {
+      if (cancelled || player.webcams) return;
 
-        const video = element.current;
-        if (!video) return;
+      const video = element.current;
+      if (!video) return;
 
-        // Remove legacy <track> tags then add fresh ones (with src set immediately)
-        video.querySelectorAll('track').forEach(t => t.remove());
+      const options = buildOptions(sources, tracks);
+      if (language) {
+        videojs.addLanguage(language.code, language.translations);
+        options.language = language.code;
+      }
 
-        tracks.current.forEach(({ locale, localeName, default: isDefault }) => {
-            const lang = (locale || '').replace(/_/g, '-').toLowerCase();
-            const el = document.createElement('track');
-            el.kind    = 'captions';
-            el.label   = localeName;
-            el.srclang = lang;
-            if (isDefault) el.default = true;
-            el.src = buildFileURL(`caption_${locale}.vtt`); // EAGER load (robust switching)
-            video.appendChild(el);
+      player.webcams = videojs(video, options, () => {
+        const recordId = storage.metadata.id;
+        watched.load(recordId);
+
+        const preferences = getMediaPreferences(config.rates);
+        if (preferences.volume !== null) player.webcams.volume(preferences.volume);
+        if (preferences.muted) player.webcams.muted(true);
+
+        player.webcams.on('volumechange', () => {
+          saveMediaPreferences({
+            muted: player.webcams.muted(),
+            volume: player.webcams.volume(),
+          });
         });
 
-        // Create player
-        player.webcams = videojs(video, buildOptions(), () => {
-            player.webcams.play();
-
-            player.webcams.on('play', () => {
-                const frequency = getFrequency();
-                interval.current = setInterval(() => {
-                    dispatchTimeUpdate(player.webcams.currentTime());
-                }, 1000 / (frequency || config.rps));
-            });
-
-            player.webcams.on('pause', () => clearInterval(interval.current));
-            player.webcams.on('seeked', () => dispatchTimeUpdate(player.webcams.currentTime()));
-
-            const time = getTime();
-            if (time) {
-                player.webcams.on('loadedmetadata', () => {
-                    const duration = player.webcams.duration();
-                    if (time < duration) player.webcams.currentTime(time);
-                });
-            }
-
-            // Get TextTracks list
-            textTracks.current = player.webcams.textTracks();
-
-            // Ensure a sensible default: prefer server default, then UI/browser, else first track
-            const selectPreferred = () => {
-                const serverDefault = (tracks.current.find(t => t.default)?.locale || '').toLowerCase();
-                const preferredLang = (serverDefault || storage?.locale || navigator.language || 'en')
-                    .split('-')[0].toLowerCase();
-
-                // Pick by language code; fall back to first
-                const list = textTracks.current;
-                let picked = null;
-                if (list) {
-                    for (let i = 0; i < list.length; i++) {
-                        const tt = list[i];
-                        const lang = (tt.language || '').toLowerCase();
-                        if (tt.kind === 'captions' || tt.kind === 'subtitles') {
-                            if (lang === preferredLang || lang.startsWith(preferredLang + '-')) {
-                                picked = tt; break;
-                            }
-                            if (!picked) picked = tt; // first
-                        }
-                    }
-                }
-                // Activate (or keep Off if none wanted)
-                if (picked) picked.mode = 'showing';
-            };
-
-            // Call a few times to win races in some browsers
-            selectPreferred();
-            setTimeout(selectPreferred, 80);
-            setTimeout(selectPreferred, 300);
-
-            // Bind the external subtitles overlay (handles language changes & Off)
-            const cleanupSubs = bindExternalSubs(player.webcams, screenSubsRef.current);
-            player._cleanupSubs = cleanupSubs;
+        player.webcams.on('ratechange', () => {
+          saveMediaPreferences({ rate: player.webcams.playbackRate() });
         });
 
-        logger.debug(ID.WEBCAMS, 'mounted');
-
-        return () => {
-            if (player.webcams) {
-                if (player._cleanupSubs) { player._cleanupSubs(); player._cleanupSubs = null; }
-                clearInterval(interval.current);
-                player.webcams.dispose();
-                player.webcams = null;
+        player.webcams.on('play', () => {
+          if (interval.current) clearInterval(interval.current);
+          const frequency = getFrequency();
+          interval.current = setInterval(() => {
+            if (player.webcams && !player.webcams.isDisposed()) {
+              const currentTime = player.webcams.currentTime();
+              dispatchTimeUpdate(currentTime);
+              watched.track(currentTime, player.webcams.playbackRate());
+              const now = Date.now();
+              if (now - lastProgressSave.current >= progress.SAVE_INTERVAL) {
+                progress.save(recordId, currentTime);
+                lastProgressSave.current = now;
+              }
             }
-            logger.debug(ID.WEBCAMS, 'unmounted');
-        };
-    }, []);
+          }, 1000 / (frequency ? frequency : config.rps));
+        });
 
-    return (
-        <div
-            aria-label={intl.formatMessage(intlMessages.aria)}
-            className="webcams-wrapper"
-            id={ID.WEBCAMS}
-        >
-            <div data-vjs-player>
-                <video
-                    id="player"
-                    className="video-js"
-                    playsInline
-                    preload="auto"
-                    autoPlay
-                    muted
-                    crossOrigin="anonymous"
-                    ref={element}
-                >
-                    <source src={buildFileURL('video/webcams.mp4')}  type="video/mp4" />
-                    <source src={buildFileURL('video/webcams.webm')} type="video/webm" />
-                </video>
-            </div>
+        player.webcams.on('seeking', () => watched.interrupt());
+        player.webcams.on('ended', () => watched.interrupt());
 
-            {/* External subtitle bar OUTSIDE the video element */}
-            <div id="screen-subs" className="screen-subs" aria-live="polite" dir="auto" ref={screenSubsRef} />
-        </div>
-    );
+        player.webcams.on('pause', () => {
+          watched.interrupt();
+          clearInterval(interval.current);
+          progress.save(recordId, player.webcams.currentTime());
+        });
+
+        player.webcams.on('seeked', () => {
+          const currentTime = player.webcams.currentTime();
+          dispatchTimeUpdate(currentTime, player.webcams.paused());
+          progress.save(recordId, currentTime);
+        });
+
+        player.webcams.on('ended', () => progress.clear(recordId));
+
+        // Restore position: URL time param takes priority, then localStorage
+        player.webcams.one('loadedmetadata', () => {
+          if (preferences.rate !== null) player.webcams.playbackRate(preferences.rate);
+
+          const duration = player.webcams.duration();
+          const urlTime = getTime();
+          if (urlTime !== null && urlTime < duration) {
+            player.webcams.currentTime(urlTime);
+          } else {
+            const savedTime = progress.load(recordId);
+            if (savedTime && savedTime < duration) {
+              player.webcams.currentTime(savedTime);
+              notify({
+                action: {
+                  label: intl.formatMessage(intlMessages.restart),
+                  onClick: () => {
+                    player.webcams.currentTime(0);
+                    progress.clear(recordId);
+                  },
+                },
+                duration: 8000,
+                message: intl.formatMessage(intlMessages.resumed, { time: formatTime(savedTime) }),
+              });
+            }
+          }
+        });
+
+        player.webcams.on('loadedmetadata', () => {
+          renderSlideMarkers(player.webcams);
+          renderBookmarkMarkers(player.webcams);
+        });
+
+        const handleBookmarks = () => renderBookmarkMarkers(player.webcams);
+        document.addEventListener(EVENTS.BOOKMARKS, handleBookmarks);
+        player.webcams.on('dispose', () => document.removeEventListener(EVENTS.BOOKMARKS, handleBookmarks));
+
+        attachTimelinePreview(player.webcams, {
+          slideLabel: (number) => intl.formatMessage(intlMessages.previewSlide, { number }),
+        });
+
+        // Title shown in the caption settings dialog's header
+        const captionSettings = player.webcams.getChild('textTrackSettings');
+        if (captionSettings) {
+          captionSettings.el().setAttribute('data-title', intl.formatMessage(intlMessages.captionSettings));
+          closeOnClickOutside(player.webcams, captionSettings);
+        }
+
+        // Caption notices share a key: each one updates the last in place,
+        // and turning translated captions off takes down one still waiting
+        const captionNotice = (message, duration, progress = null) => notify({
+          duration,
+          key: 'captions',
+          message,
+          progress,
+        });
+        setupCaptions(player.webcams, {
+          label: intl.formatMessage(intlMessages.autoTranslated),
+          locale: intl.locale,
+          // Long enough to read why the captions went back to the original
+          onFailed: (language) => captionNotice(intl.formatMessage(intlMessages.translateFailed, { language }), 10000),
+          onHidden: () => dismiss('captions'),
+          // Each notice stays until the next one replaces it
+          onPreparing: (language) => captionNotice(intl.formatMessage(intlMessages.preparing, { language }), 900000, 'busy'),
+          onProgress: (language, percent) => captionNotice(
+            intl.formatMessage(intlMessages.downloading, { language, percent }),
+            120000,
+            percent / 100,
+          ),
+          onReady: (language) => captionNotice(intl.formatMessage(intlMessages.ready, { language }), 2500),
+          onStart: (language) => captionNotice(intl.formatMessage(intlMessages.translating, { language }), 120000, 'busy'),
+          waitLabel: (language) => intl.formatMessage(intlMessages.wait, { language }),
+        });
+      });
+      // MP4, then WebM, then WebM decoded in the page (Safari)
+      playFirstWorking(player.webcams, videojs, sources.current, {
+        message: intl.formatMessage(intlMessages.unsupported),
+      });
+      logger.debug(ID.WEBCAMS, 'mounted');
+    });
+
+    return () => {
+      cancelled = true;
+    };
+    // The video.js player is created once; the locale cannot change meanwhile
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    return () => {
+      if (interval.current) clearInterval(interval.current);
+      if (player.webcams) {
+        player.webcams.dispose();
+        player.webcams = null;
+        logger.debug(ID.WEBCAMS, 'unmounted');
+      }
+    };
+  }, []);
+
+
+  return (
+    <div
+      aria-label={intl.formatMessage(intlMessages.aria)}
+      role="region"
+      className="webcams-wrapper"
+      id={ID.WEBCAMS}
+    >
+      <div data-vjs-player>
+        <video
+          className="video-js"
+          playsInline
+          preload="auto"
+          ref={element}
+        />
+      </div>
+    </div>
+  );
 };
 
 // Avoid re-render
 const areEqual = () => true;
+
 export default React.memo(Webcams, areEqual);

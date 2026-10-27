@@ -216,9 +216,11 @@ const buildThumbnails = slides => {
 
   return slides.reduce((result, slide) => {
     const {
+      height,
       id,
       src,
       timestamp,
+      width,
     } = slide;
 
     if (src.includes(ID.DESKSHARE)) {
@@ -228,10 +230,13 @@ const buildThumbnails = slides => {
         timestamp,
       });
     } else {
+      // Slide dimensions let thumbnails reserve their space before loading
       result.push({
+        height,
         id,
         src: src.replace(prefix, url),
         timestamp,
+        width,
       });
     }
 
@@ -390,10 +395,16 @@ const buildLayout = result => {
 
   if (recording?.event) {
     const newData = convertToArray(recording.event).map(layout => {
-      return {
+      const data = {
         timestamp: parseFloat(layout._timestamp),
-        showScreenshare: layout._show_screenshare === 'true',
+      };
+      if (layout._show_screenshare) {
+        data.showScreenshare = layout._show_screenshare === 'true';
       }
+      if (layout._show_presentation) {
+        data.showPresentation = layout._show_presentation === 'true';
+      }
+      return data;
     });
     return newData;
   }

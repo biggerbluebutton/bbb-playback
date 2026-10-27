@@ -13,12 +13,14 @@ import {
   POSITIONS,
 } from 'utils/constants';
 import { handleAutoScroll } from 'utils/data/handlers';
-import storage from 'utils/data/storage';
 import {
   isEmpty,
   isEqual,
 } from 'utils/data/validators';
+import getDuration from 'utils/duration';
+import { getThumbnailItems } from './utils';
 import './index.scss';
+
 
 const intlMessages = defineMessages({
   aria: {
@@ -76,60 +78,14 @@ const Thumbnails = ({
     }
   });
 
-  const items = useMemo(() => {
-    const thumbnails = storage.thumbnails;
-    const layoutSwap = storage.layoutSwap ?? [];
-    const merged = [...thumbnails, ...layoutSwap];
-    const sorted = merged.sort((a, b) => a.timestamp - b.timestamp);
-
-    const addThumbsForSwap = sorted.map((item, index, arr) => {
-      const previousItem = arr[index - 1];
-      const nextItem = arr[index + 1];
-      if (item.hasOwnProperty('showScreenshare')) {
-        if (!item.showScreenshare) {
-          const previousThumbs = arr.slice(0, index)
-          const Thumbnail = previousThumbs.find((t) => t.src && t.src !== 'screenshare');
-          // don't add if the src is the same as before
-          if (Thumbnail?.src === previousItem?.src) {
-            return null;
-          } else {
-            return {
-              ...item,
-              src: Thumbnail?.src ?? '',
-              alt: Thumbnail?.alt ?? '',
-            };
-          }
-        } else if (
-          item.showScreenshare
-          && (nextItem && nextItem.src !== 'screenshare')
-          && (previousItem && previousItem.src !== 'screenshare')
-        ) {
-          return {
-            ...item,
-            src: 'screenshare',
-            alt: 'screenshare',
-          }
-        }
-        return null;
-      }
-      return item;
-    }).filter((item) => item !== null);
-
-    const reworkIds = addThumbsForSwap.map((item, index) => {
-      return {
-        ...item,
-        id: index + 1,
-      }
-    });
-
-    return reworkIds;
-  }, []);
+  const items = useMemo(getThumbnailItems, []);
 
   const currentIndex = useCurrentIndex(items);
 
   return (
     <div
       aria-label={intl.formatMessage(intlMessages.aria)}
+      role="region"
       className="thumbnails-wrapper"
       id={ID.THUMBNAILS}
       onMouseEnter={() => interaction.current = true}
@@ -143,7 +99,9 @@ const Thumbnails = ({
           result.push(
             <Item
               active={active}
+              end={items[index + 1] ? items[index + 1].timestamp : getDuration()}
               index={index}
+              key={item.id ?? index}
               interactive={interactive}
               item={item}
               setRef={setRef}
