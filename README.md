@@ -93,6 +93,11 @@ When no URL is provided, the dev server starts normally without any proxy.
 - path:
   - `p=path/to/recordings`
 
+- share:
+  - `share=0`: does not give the viewer the recording's link: "Copy link at
+    current time" is hidden and the bookmarks download has no links. Without
+    it, or with any other value, both are offered
+
 - locale:
   - `locale=locale-CODE` (e.g., pt-BR)
 
@@ -139,7 +144,8 @@ When no URL is provided, the dev server starts normally without any proxy.
   - `fullscreen`
   - `search`
   - `section`
-  - `share`: copy a link that opens the recording at the current time
+  - `share`: copy a link that opens the recording at the current time (also
+    hidden by `share=0` in the URL)
   - `swap`
   - `theme`: light/dark theme; follows the system preference until the viewer picks one
   - `thumbnails`

@@ -23,15 +23,16 @@ const toFileName = (name, extension) => {
   return `${base}.${extension}`;
 };
 
-// Bookmarks as Markdown, each one linking back to its moment
+// Bookmarks as Markdown, each one linking back to its moment when the
+// recording's link (href) is given
 const buildBookmarksMarkdown = ({ heading, items, href, title, date }) => {
   const lines = [`# ${title}`];
   if (date) lines.push('', date);
   lines.push('', `## ${heading}`, '');
 
   items.forEach(({ note, time }) => {
-    const link = `[${formatTime(time)}](${buildTimeURL(href, time)})`;
-    lines.push(`- ${link}${note ? ` ${note}` : ''}`);
+    const moment = href ? `[${formatTime(time)}](${buildTimeURL(href, time)})` : formatTime(time);
+    lines.push(`- ${moment}${note ? ` ${note}` : ''}`);
   });
 
   return `${lines.join('\n')}\n`;
