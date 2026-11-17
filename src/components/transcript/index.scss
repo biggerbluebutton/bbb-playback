@@ -159,6 +159,10 @@
   unicode-bidi: plaintext;
 }
 
+.transcript-speaker {
+  font-weight: var(--font-weight-bold);
+}
+
 .transcript-message {
   color: var(--muted-content-color);
   font-size: .8rem;

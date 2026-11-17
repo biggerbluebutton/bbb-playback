@@ -183,7 +183,10 @@ When no URL is provided, the dev server starts normally without any proxy.
   button). They are listed in the Bookmarks panel, marked on the timeline and
   kept in the viewer's browser, per recording
 - Transcript: when a recording has captions, the Transcript panel shows them as
-  a searchable list that follows playback; clicking a line plays from there
+  a searchable list that follows playback; clicking a line plays from there.
+  Timestamps and speakers' names are bold. Names come from WebVTT voice tags
+  (`<v Name>`) or from `Name: ` labels at the start of caption lines, once a
+  label starts at least two lines
 - Timeline preview: hovering the progress bar shows the slide at that moment
 - Search: live results with the matching slide text; clicking one plays it
 - Chapters: one per slide, titled from the slide text, with how much of each

@@ -7,6 +7,10 @@ import cx from 'classnames';
 import Icon from 'components/utils/icon';
 import { reflowCues } from 'utils/captions/reflow';
 import {
+  findSpeakerRanges,
+  findSpeakers,
+} from 'utils/captions/speakers';
+import {
   isBlank,
   parseVTT,
   toPlainText,
@@ -75,19 +79,46 @@ const findActive = (cues, time) => {
   return -1;
 };
 
-const Highlight = ({ query, text }) => {
-  if (!query) return text;
+// The part of the search match ([from, to] in the line) that falls in this
+// piece of the line, which starts at `offset`
+const Highlight = ({ match, offset, text }) => {
+  if (!match) return text;
 
-  const index = text.toLowerCase().indexOf(query.toLowerCase());
-  if (index === -1) return text;
+  const start = Math.max(match[0] - offset, 0);
+  const end = Math.min(match[1] - offset, text.length);
+  if (start >= end) return text;
 
   return (
     <>
-      {text.slice(0, index)}
-      <mark>{text.slice(index, index + query.length)}</mark>
-      {text.slice(index + query.length)}
+      {text.slice(0, start)}
+      <mark>{text.slice(start, end)}</mark>
+      {text.slice(end)}
     </>
   );
+};
+
+// The line's text, its speakers' names in bold and the first match of the
+// search marked
+const LineText = ({ query, speakers, text }) => {
+  const index = query ? text.toLowerCase().indexOf(query.toLowerCase()) : -1;
+  const match = index === -1 ? null : [index, index + query.length];
+
+  const pieces = [];
+  let position = 0;
+  speakers.forEach(([from, to]) => {
+    if (from > position) pieces.push({ from: position, to: from });
+    pieces.push({ from, speaker: true, to });
+    position = to;
+  });
+  if (position < text.length) pieces.push({ from: position, to: text.length });
+
+  return pieces.map(({ from, speaker, to }) => {
+    const content = <Highlight match={match} offset={from} text={text.slice(from, to)} />;
+
+    return speaker
+      ? <strong className="transcript-speaker" key={from}>{content}</strong>
+      : <React.Fragment key={from}>{content}</React.Fragment>;
+  });
 };
 
 const Transcript = () => {
@@ -119,9 +150,15 @@ const Transcript = () => {
         // Words only: captions can carry word timings and styles. Lines are
         // the same sentence-sized ones the player shows
         if (!cancelled) {
-          setCues(reflowCues(parseVTT(text))
-            .map(cue => ({ ...cue, text: toPlainText(cue.text) }))
-            .filter(cue => !isBlank(cue.text)));
+          const lines = reflowCues(parseVTT(text))
+            .map(cue => ({ ...cue, markup: cue.text, text: toPlainText(cue.text) }))
+            .filter(cue => !isBlank(cue.text));
+          const speakers = findSpeakers(lines);
+
+          setCues(lines.map(({ markup, ...cue }) => ({
+            ...cue,
+            speakers: findSpeakerRanges(cue.text, speakers),
+          })));
         }
       })
       .catch(error => {
@@ -215,7 +252,7 @@ const Transcript = () => {
             >
               <bdi className="transcript-time">{formatTime(cue.start)}</bdi>
               <span className="transcript-text" dir="auto">
-                <Highlight query={query.trim()} text={cue.text} />
+                <LineText query={query.trim()} speakers={cue.speakers} text={cue.text} />
               </span>
             </button>
           </li>
