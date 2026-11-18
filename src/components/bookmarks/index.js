@@ -13,6 +13,7 @@ import {
 import { EVENTS, ID } from 'utils/constants';
 import storage from 'utils/data/storage';
 import { formatTime } from 'utils/format';
+import { getShare } from 'utils/params';
 import player from 'utils/player';
 import { addBookmarkNow } from './actions';
 import './index.scss';
@@ -108,16 +109,23 @@ const Bookmarks = ({ focus }) => {
     if (player.primary) player.primary.currentTime(time);
   };
 
+  // Each bookmark links to its moment, unless links are not to be given out
+  const getLink = () => {
+    if (!getShare()) return null;
+
+    const url = new URL(window.location.href.split('#')[0]);
+    url.searchParams.delete('t');
+
+    return url.toString();
+  };
+
   const download = () => {
     const { name, start } = storage.metadata || {};
-    const href = window.location.href.split('#')[0];
-    const url = new URL(href);
-    url.searchParams.delete('t');
 
     downloadFile(toFileName(name, 'md'), buildBookmarksMarkdown({
       date: start ? intl.formatDate(new Date(start), { dateStyle: 'long' }) : null,
       heading: intl.formatMessage(intlMessages.heading),
-      href: url.toString(),
+      href: getLink(),
       items,
       title: name || '',
     }), 'text/markdown');

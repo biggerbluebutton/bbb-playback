@@ -9,6 +9,7 @@ import {
 } from 'utils/format';
 import layout from 'utils/layout';
 import logger from 'utils/logger';
+import { getShare } from 'utils/params';
 import player from 'utils/player';
 import notify from 'utils/toast';
 
@@ -53,7 +54,7 @@ const copy = (text) => {
 const useShareItem = () => {
   const intl = useIntl();
 
-  if (!layout.control || config.share === false) return null;
+  if (!layout.control || config.share === false || !getShare()) return null;
 
   const handleShare = () => {
     const time = player.primary ? player.primary.currentTime() : 0;
