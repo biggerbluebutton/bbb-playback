@@ -187,7 +187,9 @@ When no URL is provided, the dev server starts normally without any proxy.
   Each line's time and its speakers' names are in bold. Names come from WebVTT
   voice tags (`<v Bob>Hello</v>`), or, in captions without them, from names
   written at the start of lines (`Bob: Hello`) when several lines have one.
-  Each speaker's words start a new line
+  Each speaker's words start a new line. BigBlueButton's own captions do not
+  name speakers: [captions/speakers.py](captions/README.md) adds the names on
+  the server, from who was talking during each line
 - Timeline preview: hovering the progress bar shows the slide at that moment
 - Search: live results with the matching slide text; clicking one plays it
 - Chapters: one per slide, titled from the slide text, with how much of each

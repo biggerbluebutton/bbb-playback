@@ -9,7 +9,7 @@ import {
   parseVTT,
   pickNext,
   tidyText,
-  toPlainText,
+  toSpokenText,
 } from 'utils/captions/vtt';
 import {
   findProviders,
@@ -47,10 +47,10 @@ const loadSourceCues = (source) => {
     if (!response.ok) throw new Error(`captions ${response.status}`);
 
     return response.text();
-    // Translators get the words only, without word timings or styles, in
-    // the same sentence-sized lines the player shows
+    // Translators get the words only, without word timings, styles or
+    // speakers' names, in the same sentence-sized lines the player shows
   }).then(text => reflowCues(parseVTT(text))
-    .map(cue => ({ ...cue, text: toPlainText(cue.text) }))
+    .map(cue => ({ ...cue, text: toSpokenText(cue.text) }))
     .filter(cue => !isBlank(cue.text)));
 };
 

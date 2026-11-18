@@ -9,6 +9,7 @@ import {
   parseVTT,
   toLabelledText,
   toPlainText,
+  toSpokenText,
 } from './vtt';
 
 const options = {
@@ -75,6 +76,15 @@ it('gives the same words as the plain text', () => {
   ].forEach((caption) => {
     expect(toLabelledText(caption).text).toEqual(toPlainText(caption));
   });
+});
+
+it('leaves the names out of the words sent for translation', () => {
+  expect(toSpokenText('<v Bob>Hello</v>')).toEqual('Hello');
+  expect(toSpokenText('<v Omar Ali>Sales grew.</v>\n<v Sara>Great <i>news</i>!')).toEqual('Sales grew.\nGreat news!');
+  expect(toSpokenText('Yes<v Alice>No')).toEqual('Yes No');
+  expect(toSpokenText('<v Dr. Lee &amp; Co>Any &lt;questions&gt;?')).toEqual('Any <questions>?');
+  expect(toSpokenText('No speaker here')).toEqual('No speaker here');
+  expect(toSpokenText(null)).toEqual('');
 });
 
 it('tells names from the start of a sentence', () => {

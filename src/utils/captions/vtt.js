@@ -72,7 +72,14 @@ const NAME_START = '\ue000';
 const NAME_END = '\ue001';
 const NAME_MARKS = /[\ue000\ue001]/g;
 
-const cleanText = (text, marked) => {
+// How a speaker's name is written in the cleaned text
+const LABELS = {
+  marked: speaker => `${NAME_START}${speaker}${NAME_END}: `,
+  none: () => ' ',
+  plain: speaker => `${speaker}: `,
+};
+
+const cleanText = (text, label) => {
   if (typeof text !== 'string') return '';
 
   let last = null;
@@ -85,7 +92,7 @@ const cleanText = (text, marked) => {
       if (isBlank(speaker) || speaker === last) return '';
 
       last = speaker;
-      return marked ? `${NAME_START}${speaker}${NAME_END}: ` : `${speaker}: `;
+      return label(speaker);
     })
     .replace(/<[^>]*>/g, '')
     .replace(/&(#x[\da-f]+|#\d+|[a-z]+);/gi, (entity, name) => {
@@ -106,7 +113,11 @@ const cleanText = (text, marked) => {
 // A caption's words without its markup, for reading and translating: word
 // timings (<00:00:14.080>), classes and styles (<c>, <i>, <b>, <u>) go,
 // a speaker (<v Bob>) becomes "Bob: ", and entities become characters
-const toPlainText = (text) => cleanText(text, false);
+const toPlainText = (text) => cleanText(text, LABELS.plain);
+
+// The words only, without the speakers' names: what translators get, so
+// that translated captions show what is said, like the original ones
+const toSpokenText = (text) => cleanText(text, LABELS.none);
 
 // The same words as toPlainText, with where each speaker's name is in them:
 // { text, names: [{ start, end }] }, a name being text.slice(start, end)
@@ -115,7 +126,7 @@ const toLabelledText = (text) => {
   let plain = '';
   let start = -1;
 
-  for (const char of cleanText(text, true)) {
+  for (const char of cleanText(text, LABELS.marked)) {
     if (char === NAME_START) {
       start = plain.length;
     } else if (char === NAME_END) {
@@ -177,4 +188,5 @@ export {
   toLabelledText,
   toPlainText,
   toSeconds,
+  toSpokenText,
 };
