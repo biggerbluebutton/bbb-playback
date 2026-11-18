@@ -1,4 +1,5 @@
 import { captions as config } from 'config';
+import { getSpeakers } from './vtt';
 
 // Captions typed or transcribed live are recorded as they are produced, so
 // the recording scripts write them a word or two per cue and the player
@@ -84,18 +85,25 @@ const mergeCues = (cues, options) => {
   const sorted = [...cues].sort((a, b) => a.start - b.start);
   const merged = [];
   let current = null;
+  // Who is talking at the end of the current cue (WebVTT <v Bob>)
+  let speaker;
 
   sorted.forEach((cue) => {
     const text = normalizeText(cue.text || '');
     if (!text) return;
 
+    const speakers = getSpeakers(text);
+
     if (current) {
       // Break at the end of a sentence once the cue holds a reasonable
       // amount of text, otherwise keep short sentences together
       const sentence = endsSentence(current.text) && textWidth(current.text) >= characters / 2;
+      // Each speaker's words start a cue of their own
+      const turn = speakers.length > 0 && speakers[0] !== speaker;
       const joined = normalizeText(`${current.text} ${text}`);
 
       const fits = !sentence
+        && !turn
         && textWidth(joined) <= characters
         && cue.end - current.start <= duration
         && cue.start - current.end < gap;
@@ -104,12 +112,14 @@ const mergeCues = (cues, options) => {
         current.text = joined;
         current.end = Math.max(current.end, cue.end);
         current.cues.push(cue);
+        if (speakers.length > 0) speaker = speakers[speakers.length - 1];
         return;
       }
 
       merged.push(current);
     }
 
+    speaker = speakers.length > 0 ? speakers[speakers.length - 1] : undefined;
     current = {
       ...cue,
       start: cue.start,

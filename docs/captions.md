@@ -13,7 +13,8 @@ how to troubleshoot it.
 - **The recording's captions** in every language they were recorded in.
   Captions typed or transcribed live are recorded a word or two at a time;
   the player regroups them into sentences (up to about two lines and seven
-  seconds each, breaking at the end of a sentence and at pauses), in the
+  seconds each, breaking at the end of a sentence, at pauses and when
+  another speaker starts, as named by WebVTT voice tags), in the
   captions, the transcript and the lines sent for translation. Captions
   that already hold sentences are shown as they are. See `captions.reflow`
   in the README's Configuration section.

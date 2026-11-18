@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   defineMessages,
   useIntl,
@@ -6,11 +12,8 @@ import {
 import cx from 'classnames';
 import Icon from 'components/utils/icon';
 import { reflowCues } from 'utils/captions/reflow';
-import {
-  isBlank,
-  parseVTT,
-  toPlainText,
-} from 'utils/captions/vtt';
+import { toTranscriptLines } from 'utils/captions/speakers';
+import { parseVTT } from 'utils/captions/vtt';
 import { EVENTS, ID } from 'utils/constants';
 import { buildFileURL } from 'utils/data';
 import storage from 'utils/data/storage';
@@ -75,19 +78,64 @@ const findActive = (cues, time) => {
   return -1;
 };
 
-const Highlight = ({ query, text }) => {
-  if (!query) return text;
+// Where the search first matches the text, as [start, end)
+const findMatch = (text, query) => {
+  if (!query) return null;
 
   const index = text.toLowerCase().indexOf(query.toLowerCase());
-  if (index === -1) return text;
+  if (index === -1) return null;
+
+  return [index, index + query.length];
+};
+
+// The text from start to end, with the part the search matched marked
+const Marked = ({ end, match, start, text }) => {
+  if (!match || match[1] <= start || match[0] >= end) return text.slice(start, end);
+
+  const from = Math.max(start, match[0]);
+  const to = Math.min(end, match[1]);
 
   return (
     <>
-      {text.slice(0, index)}
-      <mark>{text.slice(index, index + query.length)}</mark>
-      {text.slice(index + query.length)}
+      {text.slice(start, from)}
+      <mark>{text.slice(from, to)}</mark>
+      {text.slice(to, end)}
     </>
   );
+};
+
+const COLON = /^[:：]$/;
+
+// A line's words with the speakers' names in bold. Each name is isolated
+// (<bdi>) so that a name in another script does not set the direction of
+// the line, and its colon stays between the name and the words
+const LineText = ({ names = [], query, text }) => {
+  const match = findMatch(text, query);
+  const parts = [];
+  let position = 0;
+
+  names.forEach(({ end, start }) => {
+    if (start < position || end <= start) return;
+
+    const label = COLON.test(text.charAt(end)) ? end + 1 : end;
+    if (start > position) {
+      parts.push(<Marked end={start} key={`t${position}`} match={match} start={position} text={text} />);
+    }
+
+    parts.push(
+      <b className="transcript-speaker" key={`s${start}`}>
+        <bdi><Marked end={end} match={match} start={start} text={text} /></bdi>
+        <Marked end={label} match={match} start={end} text={text} />
+      </b>
+    );
+    position = label;
+  });
+
+  if (position < text.length) {
+    parts.push(<Marked end={text.length} key={`t${position}`} match={match} start={position} text={text} />);
+  }
+
+  return <Fragment>{parts}</Fragment>;
 };
 
 const Transcript = () => {
@@ -117,12 +165,9 @@ const Transcript = () => {
       })
       .then(text => {
         // Words only: captions can carry word timings and styles. Lines are
-        // the same sentence-sized ones the player shows
-        if (!cancelled) {
-          setCues(reflowCues(parseVTT(text))
-            .map(cue => ({ ...cue, text: toPlainText(cue.text) }))
-            .filter(cue => !isBlank(cue.text)));
-        }
+        // the same sentence-sized ones the player shows, with where the
+        // speakers' names are
+        if (!cancelled) setCues(toTranscriptLines(reflowCues(parseVTT(text))));
       })
       .catch(error => {
         logger.warn('transcript', error);
@@ -215,7 +260,7 @@ const Transcript = () => {
             >
               <bdi className="transcript-time">{formatTime(cue.start)}</bdi>
               <span className="transcript-text" dir="auto">
-                <Highlight query={query.trim()} text={cue.text} />
+                <LineText names={cue.names} query={query.trim()} text={cue.text} />
               </span>
             </button>
           </li>

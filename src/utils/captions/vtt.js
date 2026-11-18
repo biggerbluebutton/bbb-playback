@@ -53,14 +53,40 @@ const ENTITIES = {
   rlm: '\u200f',
 };
 
-// A caption's words without its markup, for reading and translating: word
-// timings (<00:00:14.080>), classes and styles (<c>, <i>, <b>, <u>) go,
-// a speaker (<v Bob>) becomes "Bob: ", and entities become characters
-const toPlainText = (text) => {
+// A speaker, as WebVTT names one: <v Bob>, <v.loud Bob Smith>
+const VOICE = /<v(?:\.[^\s>]*)?\s+([^>]+)>/g;
+
+const toSpeaker = (name) => name.replace(/\s+/g, ' ').trim();
+
+// The speakers named in a caption, in order
+const getSpeakers = (text) => {
+  if (typeof text !== 'string') return [];
+
+  return Array.from(text.matchAll(VOICE), match => toSpeaker(match[1]))
+    .filter(speaker => !isBlank(speaker));
+};
+
+// Put around a speaker's name while the text is cleaned, to find it after:
+// private use characters, which captions do not carry
+const NAME_START = '\ue000';
+const NAME_END = '\ue001';
+const NAME_MARKS = /[\ue000\ue001]/g;
+
+const cleanText = (text, marked) => {
   if (typeof text !== 'string') return '';
 
+  let last = null;
   const plain = text
-    .replace(/<v(?:\.[^\s>]*)?\s+([^>]+)>/g, (match, speaker) => `${speaker.trim()}: `)
+    .replace(NAME_MARKS, '')
+    .replace(VOICE, (match, name) => {
+      const speaker = toSpeaker(name);
+      // Named once while they keep talking: captions regrouped into
+      // sentences have the same <v Bob> on every piece
+      if (isBlank(speaker) || speaker === last) return '';
+
+      last = speaker;
+      return marked ? `${NAME_START}${speaker}${NAME_END}: ` : `${speaker}: `;
+    })
     .replace(/<[^>]*>/g, '')
     .replace(/&(#x[\da-f]+|#\d+|[a-z]+);/gi, (entity, name) => {
       if (name[0] === '#') {
@@ -75,6 +101,32 @@ const toPlainText = (text) => {
     .split('\n')
     .map(line => line.replace(/[ \t]{2,}/g, ' '))
     .join('\n');
+};
+
+// A caption's words without its markup, for reading and translating: word
+// timings (<00:00:14.080>), classes and styles (<c>, <i>, <b>, <u>) go,
+// a speaker (<v Bob>) becomes "Bob: ", and entities become characters
+const toPlainText = (text) => cleanText(text, false);
+
+// The same words as toPlainText, with where each speaker's name is in them:
+// { text, names: [{ start, end }] }, a name being text.slice(start, end)
+const toLabelledText = (text) => {
+  const names = [];
+  let plain = '';
+  let start = -1;
+
+  for (const char of cleanText(text, true)) {
+    if (char === NAME_START) {
+      start = plain.length;
+    } else if (char === NAME_END) {
+      if (start !== -1) names.push({ end: plain.length, start });
+      start = -1;
+    } else {
+      plain += char;
+    }
+  }
+
+  return { names, text: plain };
 };
 
 const parseVTT = (text = '') => {
@@ -116,11 +168,13 @@ const pickNext = (pending, time = 0, size = 1) => {
 };
 
 export {
+  getSpeakers,
   isBlank,
   orderFrom,
   pickNext,
   parseVTT,
   tidyText,
+  toLabelledText,
   toPlainText,
   toSeconds,
 };

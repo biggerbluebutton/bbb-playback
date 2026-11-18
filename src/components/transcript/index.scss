@@ -140,6 +140,11 @@
     color: inherit;
     font-weight: var(--font-weight-semi-bold);
   }
+
+  // A search match inside a speaker's name stays as bold as the name
+  .transcript-speaker mark {
+    font-weight: inherit;
+  }
 }
 
 .transcript-time {
@@ -157,6 +162,10 @@
 .transcript-text {
   flex: 1;
   unicode-bidi: plaintext;
+}
+
+.transcript-speaker {
+  font-weight: var(--font-weight-bold);
 }
 
 .transcript-message {

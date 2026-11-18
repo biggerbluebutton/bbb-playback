@@ -209,6 +209,33 @@ it('joins wide characters without spaces and limits their width', () => {
   expect(mergeCues(wide, options).map(cue => textWidth(cue.text))).toEqual([80, 40]);
 });
 
+it('starts a new cue when another speaker talks', () => {
+  const cues = [
+    { start: 0, end: 1, text: '<v Bob>Hello' },
+    { start: 1, end: 2, text: '<v Bob>everyone' },
+    { start: 2, end: 3, text: 'and welcome' },
+    { start: 3, end: 4, text: '<v Alice>Thanks' },
+    { start: 4, end: 5, text: '<v Alice>Bob' },
+    { start: 5, end: 6, text: '<v Bob>Let us' },
+  ];
+
+  expect(texts(mergeCues(cues, options))).toEqual([
+    '<v Bob>Hello <v Bob>everyone and welcome',
+    '<v Alice>Thanks <v Alice>Bob',
+    '<v Bob>Let us',
+  ]);
+
+  // A cue ending with another speaker hands the turn to them
+  const handover = [
+    { start: 0, end: 1, text: '<v Bob>Ready?</v>\n<v Alice>Yes' },
+    { start: 1, end: 2, text: '<v Alice>let us go' },
+  ];
+
+  expect(texts(mergeCues(handover, options))).toEqual([
+    '<v Bob>Ready?</v> <v Alice>Yes <v Alice>let us go',
+  ]);
+});
+
 it('reflows word-level cues and leaves the others alone', () => {
   const words = parseVTT(wordLevel);
   expect(texts(reflowCues(words, options))).toEqual([
