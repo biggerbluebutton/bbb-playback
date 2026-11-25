@@ -39,6 +39,9 @@ const getSearchParam = (name) => {
   return null;
 };
 
+// `share=0` hides what gives the viewer a link to the recording
+const getShare = () => getSearchParam('share') !== '0';
+
 const getStyle = () => {
   const param = getSearchParam('s');
   const { url } = styles;
@@ -128,6 +131,7 @@ export {
   getFrequency,
   getLayout,
   getMediaPath,
+  getShare,
   getStyle,
   getSearchParam,
   getTime,

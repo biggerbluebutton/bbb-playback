@@ -1,7 +1,29 @@
 import {
+  getShare,
   parseRecordId,
   parseTimeToSeconds,
 } from './params';
+
+it('gives out links unless share is 0', () => {
+  const open = (search) => window.history.replaceState({}, '', `/${search}`);
+
+  open('');
+  expect(getShare()).toEqual(true);
+
+  open('?share=0');
+  expect(getShare()).toEqual(false);
+
+  open('?t=1m30s&share=0');
+  expect(getShare()).toEqual(false);
+
+  open('?share=1');
+  expect(getShare()).toEqual(true);
+
+  open('?share');
+  expect(getShare()).toEqual(true);
+
+  open('');
+});
 
 it('gets record id', () => {
   expect(parseRecordId({
